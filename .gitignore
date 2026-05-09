@@ -15,6 +15,7 @@ dist/
 dist-ssr/
 build/
 out/
+extension-release.zip
 
 # TypeScript
 *.tsbuildinfo
