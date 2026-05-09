@@ -31,7 +31,9 @@ function matchesUrlOptimized(url: string, patterns: string[]): boolean {
 }
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url) {
+  // Status 'complete' is the standard trigger.
+  // We also check for changeInfo.url to handle SPA navigation where status might not change to complete.
+  if (tab.url && (changeInfo.status === 'complete' || changeInfo.url)) {
     await orchestrateInjection(tabId, tab.url);
   }
 });
@@ -62,6 +64,11 @@ chrome.storage.onChanged.addListener(async () => {
 });
 
 async function orchestrateInjection(tabId: number, url: string) {
+  // Skip internal browser pages
+  if (!url || url.startsWith('chrome://') || url.startsWith('edge://') || url.startsWith('about:') || url.startsWith('view-source:')) {
+    return;
+  }
+
   const state = await getAll();
   let activeCount = 0;
   
@@ -74,12 +81,8 @@ async function orchestrateInjection(tabId: number, url: string) {
   for (const script of state.scripts) {
     if (script.enabled && matchesUrlOptimized(url, script.urlPatterns)) {
       activeCount++;
-      const delay = script.delayMs || 0;
-      if (delay > 0) {
-        setTimeout(() => inject(tabId, script), delay);
-      } else {
-        inject(tabId, script);
-      }
+      // Kick off injection; it handles its own delay internal to the tab
+      inject(tabId, script);
     }
   }
 
@@ -105,30 +108,46 @@ function updateBadgeWithCount(tabId: number, count: number) {
 
 async function inject(tabId: number, script: ScriptEntry) {
   try {
-    if (script.cssCode) {
+    const { cssCode, jsCode, delayMs = 0 } = script;
+    const identifier = script.name || (script.urlPatterns && script.urlPatterns[0]) || 'Untitled Script';
+
+    // 1. Inject CSS
+    if (cssCode) {
       await chrome.scripting.insertCSS({
         target: { tabId },
-        css: script.cssCode,
+        css: cssCode,
       });
     }
-    if (script.jsCode) {
+
+    // 2. Inject JS
+    if (jsCode) {
       await chrome.scripting.executeScript({
         target: { tabId },
-        func: (code: string) => {
-          try {
-            // Use a function to avoid global scope pollution and catch errors
-            new Function(code)();
-          } catch (e) {
-            console.error('Error in injected script:', e);
+        // Use ISOLATED world by default to bypass page CSP for eval/new Function
+        // This is safer for DOM manipulation.
+        world: 'ISOLATED', 
+        func: (code: string, delay: number, scriptName: string) => {
+          const run = () => {
+            try {
+              // Using a simple function wrapper for the user code
+              const fn = new Function(code);
+              fn();
+            } catch (e) {
+              console.error(`[Injector] Error in script "${scriptName}":`, e);
+            }
+          };
+
+          if (delay > 0) {
+            setTimeout(run, delay);
+          } else {
+            run();
           }
         },
-        args: [script.jsCode],
+        args: [jsCode, delayMs, identifier],
       });
     }
   } catch (err: any) {
-    const identifier = script.name || script.urlPatterns[0] || 'Untitled Script';
-    console.error(`Failed to inject script "${identifier}":`, err);
-    // Don't spam notifications on every page load failure (e.g. restricted pages)
-    // notifyError(`Failed to inject script "${identifier}": ${err.message}`);
+    const identifier = script.name || (script.urlPatterns && script.urlPatterns[0]) || 'Untitled Script';
+    console.error(`[Injector] Failed to inject "${identifier}":`, err.message);
   }
 }

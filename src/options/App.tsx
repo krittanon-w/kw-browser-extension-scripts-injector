@@ -86,8 +86,26 @@ function App() {
     const script: ScriptEntry = {
       id: crypto.randomUUID(),
       name: "",
-      cssCode: "/* Add your CSS here */",
-      jsCode: "// Add your JavaScript here",
+      cssCode: `/* Add your CSS here 
+
+
+
+
+
+
+      
+
+*/`,
+      jsCode: `// Add your JavaScript here
+      
+      
+
+
+
+
+
+      
+`,
       urlPatterns: ["*://example.com/*"],
       enabled: true,
       delayMs: 500,
