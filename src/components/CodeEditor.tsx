@@ -18,11 +18,12 @@ export function CodeEditor({ value, onChange, language, readOnly = false }: Code
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   
-  // Use a ref for onChange to avoid stale closures in the editor's update listener
   const onChangeRef = useRef(onChange);
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  const isExternalUpdate = useRef(false);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -40,7 +41,8 @@ export function CodeEditor({ value, onChange, language, readOnly = false }: Code
       EditorView.editable.of(!readOnly),
       EditorView.updateListener.of((update) => {
         // Only trigger onChange if the document actually changed AND we're not in read-only mode
-        if (update.docChanged && !readOnly) {
+        // AND it wasn't an external value prop update
+        if (update.docChanged && !readOnly && !isExternalUpdate.current) {
           onChangeRef.current(update.state.doc.toString());
         }
       }),
@@ -69,9 +71,11 @@ export function CodeEditor({ value, onChange, language, readOnly = false }: Code
   // Update editor content if value prop changes from outside
   useEffect(() => {
     if (viewRef.current && value !== viewRef.current.state.doc.toString()) {
+      isExternalUpdate.current = true;
       viewRef.current.dispatch({
         changes: { from: 0, to: viewRef.current.state.doc.length, insert: value }
       });
+      isExternalUpdate.current = false;
     }
   }, [value]);
 
