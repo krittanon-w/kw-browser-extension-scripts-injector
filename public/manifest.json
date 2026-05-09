@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "CSS & JS Injector",
+  "name": "Scripts Injector",
   "version": "1.0.0",
   "description": "Inject custom CSS and JS into any website based on URL patterns.",
   "permissions": [

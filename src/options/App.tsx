@@ -65,11 +65,7 @@ function App() {
         s.urlPatterns.some((p) => p.toLowerCase().includes(query)),
     );
 
-    const sorted = [...filtered].sort((a, b) => {
-      const nameA = (a.urlPatterns[0] || "").toLowerCase();
-      const nameB = (b.urlPatterns[0] || "").toLowerCase();
-      return nameA.localeCompare(nameB);
-    });
+    const sorted = [...filtered].sort((a, b) => b.updatedAt - a.updatedAt);
 
     return {
       enabled: sorted.filter((s) => s.enabled),
@@ -97,7 +93,6 @@ function App() {
 
     setState({ ...state, scripts: [...state.scripts, script] });
     setActiveId(script.id);
-    toast("New injector created", "success");
   }
 
   function handleUpdate(id: string, updates: Partial<ScriptEntry>) {
@@ -123,7 +118,6 @@ function App() {
       if (activeId === id) {
         setActiveId(newScripts[0]?.id || null);
       }
-      toast("Injector deleted", "info");
     }
   }
 
@@ -131,7 +125,6 @@ function App() {
     if (!state) return;
     const next = !state.globalEnabled;
     setState({ ...state, globalEnabled: next });
-    toast(next ? "Extension enabled" : "Extension disabled", "info");
   }
 
   // We'll calculate match status per URL inside the render loop for clarity
@@ -177,19 +170,15 @@ function App() {
       <header className="options-header">
         <div className="options-header-title">
           <Layout className="options-header-logo" size={20} />
-          <span>CSS & JS Injector</span>
+          <span>Scripts Injector</span>
         </div>
 
         <div className="flex items-center gap-4">
-          <div
-            className={cn("global-toggle-pill", state.globalEnabled && "on")}
-            onClick={handleToggleGlobal}
-          >
-            <div className="w-2 h-2 rounded-full bg-current" />
-            <span>
-              {state.globalEnabled ? "Extension enabled" : "Extension disabled"}
-            </span>
-          </div>
+          <Switch
+            label="Disable/Enable Extension"
+            checked={state.globalEnabled}
+            onChange={handleToggleGlobal}
+          />
         </div>
       </header>
 
