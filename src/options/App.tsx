@@ -55,20 +55,23 @@ function App() {
   if (!state) return <div style={{ padding: '2rem' }}>Loading...</div>;
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '1000px', margin: '0 auto', boxSizing: 'border-box' }}>
+    <div data-ref="options-page" style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '1000px', width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
       <h1>CSS & JS Injector Options</h1>
       
-      <div style={{ marginBottom: '3rem', padding: '1.5rem', border: '1px solid #eee', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+      {/* Global master toggle */}
+      <div data-ref="global-toggle" style={{ marginBottom: '3rem', padding: '1.5rem', border: '1px solid #eee', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
         <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>Enable / Disable Extension</span>
-        <label className="switch" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', transform: 'scale(1.5)', marginRight: '1rem' }}>
+        <label className="switch" data-ref="global-toggle-switch" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', transform: 'scale(1.5)', marginRight: '1rem' }}>
           <input type="checkbox" checked={state.globalEnabled} onChange={handleToggleGlobal} />
         </label>
       </div>
 
-      <section style={{ marginBottom: '3rem', padding: '1.5rem', border: '1px solid #eee', borderRadius: '8px' }}>
+      {/* Create new injector form */}
+      <section data-ref="create-injector-section" style={{ marginBottom: '3rem', padding: '1.5rem', border: '1px solid #eee', borderRadius: '8px' }}>
         <h2 style={{ marginTop: 0 }}>Create New Injector</h2>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div data-ref="create-injector-form" style={{ display: 'flex', gap: '1rem' }}>
           <input 
+            data-ref="create-injector-input"
             style={{ flex: 1, padding: '0.6rem', borderRadius: '4px', border: '1px solid #ccc' }}
             placeholder="Enter a URL pattern (e.g. *://example.com/*)..." 
             value={newPattern} 
@@ -76,6 +79,7 @@ function App() {
             onKeyDown={e => e.key === 'Enter' && handleAdd()}
           />
           <button 
+            data-ref="create-injector-btn"
             style={{ padding: '0.6rem 2rem', borderRadius: '4px', border: 'none', background: '#02abff', color: '#fff', cursor: 'pointer', fontWeight: 'bold' }}
             onClick={handleAdd}
           >
@@ -84,21 +88,27 @@ function App() {
         </div>
       </section>
 
-      <section>
+      {/* Injectors list */}
+      <section data-ref="injectors-list">
         <h2 style={{ marginBottom: '1.5rem' }}>Injectors</h2>
         {state.scripts.length === 0 && <p style={{ color: '#666' }}>No injectors configured yet.</p>}
         {state.scripts.map(script => (
-          <div key={script.id} style={{ border: '1px solid #eee', borderRadius: '12px', padding: '2rem', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', backgroundColor: '#fff', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ flex: 1, display: 'flex', gap: '1rem', alignItems: 'center', overflow: 'hidden', minWidth: 0 }}>
-                {editingId !== script.id && (
-                  <span style={{ fontSize: '1.2rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: script.enabled ? '#333' : '#999' }}>
-                    {script.urlPatterns[0] || 'No patterns'}
-                  </span>
-                )}
+          <div
+            key={script.id}
+            data-ref="injector-card"
+            data-injector-id={script.id}
+            style={{ border: '1px solid #eee', borderRadius: '12px', padding: '2rem', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', backgroundColor: '#fff', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}
+          >
+            {/* Card header row */}
+            <div data-ref="injector-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div data-ref="injector-card-title" style={{ flex: 1, display: 'flex', gap: '1rem', alignItems: 'center', overflow: 'hidden', minWidth: 0 }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: script.enabled ? '#333' : '#999', visibility: editingId === script.id ? 'hidden' : 'visible' }}>
+                  {script.urlPatterns[0] || 'No patterns'}
+                </span>
               </div>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <label className="switch" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <div data-ref="injector-card-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                {/* Enable/Disable toggle */}
+                <label className="switch" data-ref="injector-toggle-switch" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                   <input 
                     type="checkbox" 
                     checked={script.enabled} 
@@ -113,7 +123,9 @@ function App() {
                   <span style={{ fontSize: '1rem', color: '#666' }}>{script.enabled ? 'On' : 'Off'}</span>
                 </label>
                 
+                {/* Edit / Close button */}
                 <button 
+                  data-ref="injector-edit-btn"
                   style={{ 
                     minWidth: '100px',
                     padding: '0.6rem 1rem', 
@@ -131,7 +143,10 @@ function App() {
                 >
                   {editingId === script.id ? 'Close' : 'Edit'}
                 </button>
+
+                {/* Delete button */}
                 <button 
+                  data-ref="injector-delete-btn"
                   style={{ 
                     minWidth: '100px',
                     padding: '0.6rem 1rem', 
@@ -149,9 +164,10 @@ function App() {
               </div>
             </div>
 
+            {/* Expanded edit panel */}
             {editingId === script.id && (
-              <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0, width: '100%' }}>
-                <div>
+              <div data-ref="injector-edit-panel" style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0, width: '100%' }}>
+                <div data-ref="url-patterns-editor">
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.8rem', color: '#888', fontWeight: 'normal' }}>URL Patterns (one per line)</h3>
                   <CodeEditor 
                     value={script.urlPatterns.join('\n')} 
@@ -160,7 +176,7 @@ function App() {
                   />
                 </div>
 
-                <div>
+                <div data-ref="css-editor">
                   <h3 style={{ fontSize: '1.3rem', marginBottom: '0.8rem', color: '#02abff', fontWeight: 'bold' }}>Custom CSS</h3>
                   <CodeEditor 
                     value={script.cssCode} 
@@ -168,7 +184,7 @@ function App() {
                     onChange={cssCode => handleUpdate(script.id, { cssCode })}
                   />
                 </div>
-                <div>
+                <div data-ref="js-editor">
                   <h3 style={{ fontSize: '1.3rem', marginBottom: '0.8rem', color: '#f59e0b', fontWeight: 'bold' }}>Custom JavaScript</h3>
                   <CodeEditor 
                     value={script.jsCode} 
@@ -176,7 +192,7 @@ function App() {
                     onChange={jsCode => handleUpdate(script.id, { jsCode })}
                   />
                 </div>
-                <div style={{ fontSize: '0.95rem', color: '#888', fontStyle: 'italic', marginTop: '1rem' }}>
+                <div data-ref="autosave-notice" style={{ fontSize: '0.95rem', color: '#888', fontStyle: 'italic', marginTop: '1rem' }}>
                   Changes are saved automatically as you type.
                 </div>
               </div>
@@ -185,10 +201,12 @@ function App() {
         ))}
       </section>
 
-      <section style={{ marginTop: '5rem', padding: '2rem', borderTop: '2px solid #eee' }}>
+      {/* Backup & Restore */}
+      <section data-ref="backup-restore-section" style={{ marginTop: '5rem', padding: '2rem', borderTop: '2px solid #eee' }}>
         <h2 style={{ marginTop: 0 }}>Backup & Restore</h2>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 
+            data-ref="export-btn"
             style={{ padding: '0.6rem 1.2rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', cursor: 'pointer' }}
             onClick={() => exportData(state)}
           >
@@ -197,6 +215,7 @@ function App() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.9rem', color: '#666' }}>Import from file:</span>
             <input 
+              data-ref="import-file-input"
               type="file" 
               accept=".json" 
               style={{ fontSize: '0.9rem' }}
