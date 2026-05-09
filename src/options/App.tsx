@@ -8,7 +8,6 @@ import {
   Check,
   AlertCircle,
   Clock,
-  Layout,
   Download,
   Upload,
   X,
@@ -22,7 +21,6 @@ import { matchesUrl } from "../lib/url-matcher";
 import { Switch } from "../components/ui/Switch";
 import { ToastProvider, toast } from "../components/ui/Toast";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
-import { HelpModal } from "../components/HelpModal";
 import { cn } from "../components/ui/cn";
 import {
   formatRelativeTime,
@@ -34,7 +32,6 @@ function App() {
   const [state, setState] = useState<ExtensionState | null>(null);
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { confirm, element: confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
@@ -130,6 +127,13 @@ function App() {
     setState({ ...state, globalEnabled: next });
   }
 
+  function handleOpenHelp() {
+    window.open(
+      "https://github.com/krittanon-w/kw-browser-extension-scripts-injector/blob/main/HELP.md",
+      "_blank",
+    );
+  }
+
   // We'll calculate match status per URL inside the render loop for clarity
   // since the user wants status "in the end" of each input box.
 
@@ -168,12 +172,11 @@ function App() {
     <div className="options-layout">
       <ToastProvider />
       {confirmDialog}
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
       {/* Header */}
       <header className="options-header">
         <div className="options-header-title">
-          <Layout className="options-header-logo" size={20} />
+          <img src="/icon.png" className="w-8 h-8 object-contain" alt="Logo" />
           <span>Scripts Injector</span>
         </div>
 
@@ -186,7 +189,7 @@ function App() {
           <div className="w-[1px] h-6 bg-border mx-1" />
           <button
             className="btn btn-secondary p-2 rounded-full"
-            onClick={() => setIsHelpOpen(true)}
+            onClick={handleOpenHelp}
             title="Help & Documentation"
           >
             <HelpCircle size={18} />
@@ -338,13 +341,13 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <label className="field-label !mb-0">URL Patterns</label>
-                      <button
-                        onClick={() => setIsHelpOpen(true)}
-                        className="text-text-muted hover:text-primary transition-colors cursor-pointer"
-                        title="Help"
-                      >
-                        <HelpCircle size={14} />
-                      </button>
+                  <button
+                    onClick={handleOpenHelp}
+                    className="text-text-muted hover:text-primary transition-colors cursor-pointer"
+                    title="Help"
+                  >
+                    <HelpCircle size={14} />
+                  </button>
                     </div>
                     <a
                       href="https://developer.chrome.com/docs/extensions/mv3/match_patterns/"
@@ -395,7 +398,7 @@ function App() {
                 <div className="flex items-center gap-2 mb-2">
                   <label className="field-label !mb-0">Test URL Matching</label>
                   <button
-                    onClick={() => setIsHelpOpen(true)}
+                    onClick={handleOpenHelp}
                     className="text-text-muted hover:text-primary transition-colors cursor-pointer"
                     title="Help"
                   >
@@ -486,7 +489,7 @@ function App() {
                         Custom CSS
                       </span>
                       <button
-                        onClick={() => setIsHelpOpen(true)}
+                        onClick={handleOpenHelp}
                         className="text-text-muted hover:text-primary transition-colors ml-1 cursor-pointer"
                         title="Help"
                       >
@@ -519,7 +522,7 @@ function App() {
                         Custom JavaScript
                       </span>
                       <button
-                        onClick={() => setIsHelpOpen(true)}
+                        onClick={handleOpenHelp}
                         className="text-text-muted hover:text-primary transition-colors ml-1 cursor-pointer"
                         title="Help"
                       >
@@ -547,8 +550,8 @@ function App() {
             </div>
           ) : (
             <div className="empty-state">
-              <div className="p-6 rounded-full bg-surface-3 mb-4">
-                <Layout className="empty-state-icon" />
+              <div className="p-8 rounded-3xl bg-surface-3 mb-6 shadow-xl border border-border/50">
+                <img src="/icon.png" className="w-20 h-20 object-contain" alt="Logo" />
               </div>
               <h2>Select or create an injector</h2>
               <p className="max-w-[280px]">

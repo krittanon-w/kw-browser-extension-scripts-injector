@@ -17,7 +17,18 @@
     "service_worker": "assets/background.js",
     "type": "module"
   },
-  "action": {},
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
   "options_page": "src/options/index.html",
   "content_scripts": [
     {
