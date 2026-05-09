@@ -123,17 +123,23 @@ async function inject(tabId: number, script: ScriptEntry) {
     if (jsCode) {
       await chrome.scripting.executeScript({
         target: { tabId },
-        // Use ISOLATED world by default to bypass page CSP for eval/new Function
-        // This is safer for DOM manipulation.
-        world: 'ISOLATED', 
+        world: 'ISOLATED', // The script element will execute in MAIN world anyway
         func: (code: string, delay: number, scriptName: string) => {
           const run = () => {
             try {
-              // Using a simple function wrapper for the user code
-              const fn = new Function(code);
-              fn();
+              const scriptEl = document.createElement('script');
+              // Wrapping in an IIFE to provide local scope and error catching
+              scriptEl.textContent = `(function() {
+                try {
+                  ${code}
+                } catch(e) {
+                  console.error('[Injector] Error in script "${scriptName}":', e);
+                }
+              })();`;
+              (document.head || document.documentElement).appendChild(scriptEl);
+              scriptEl.remove();
             } catch (e) {
-              console.error(`[Injector] Error in script "${scriptName}":`, e);
+              console.error(`[Injector] Failed to inject "${scriptName}":`, e);
             }
           };
 
