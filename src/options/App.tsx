@@ -354,61 +354,76 @@ function App() {
                 {/* Test URLs - Dynamic List */}
                 <div className="mt-4 flex flex-col gap-2">
                   <label className="field-label">Test URL Matching</label>
-                  {(activeScript.testUrls || [""]).concat(
-                    (activeScript.testUrls?.length || 0) > 0 &&
-                      activeScript.testUrls![activeScript.testUrls!.length - 1]
-                        .trim() !== ""
-                      ? [""]
-                      : [],
-                  ).map((url, idx) => {
-                    const isMatch = url.trim() ? matchesUrl(url, activeScript.urlPatterns) : null;
-                    return (
-                      <div key={idx} className="flex items-center gap-3">
-                        <input
-                          className="input h-9 text-xs font-mono flex-1"
-                          placeholder="Enter URL to test..."
-                          value={url}
-                          onChange={(e) => {
-                            const newUrls = [...(activeScript.testUrls || [])];
-                            // Ensure the array is long enough
-                            while (newUrls.length <= idx) newUrls.push("");
-                            newUrls[idx] = e.target.value;
-                            handleUpdate(activeScript.id, { testUrls: newUrls });
-                          }}
-                        />
-                        <div className="w-24 shrink-0">
-                          {url.trim() && (
-                            <div
-                              className={cn(
-                                "match-result py-1 px-2 text-[10px] w-full justify-center",
-                                isMatch ? "match" : "no-match",
-                              )}
-                            >
-                              {isMatch ? (
-                                <Check size={10} strokeWidth={3} />
-                              ) : (
-                                <AlertCircle size={10} strokeWidth={3} />
-                              )}
-                              <span className="font-semibold uppercase tracking-tight">
-                                {isMatch ? "Match" : "No match"}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        {idx < (activeScript.testUrls?.length || 0) && (
-                          <button
-                            className="btn-icon p-1 hover:text-danger"
-                            onClick={() => {
-                              const newUrls = activeScript.testUrls!.filter((_, i) => i !== idx);
-                              handleUpdate(activeScript.id, { testUrls: newUrls });
+                  {(activeScript.testUrls || [""])
+                    .concat(
+                      (activeScript.testUrls?.length || 0) > 0 &&
+                        activeScript.testUrls![
+                          activeScript.testUrls!.length - 1
+                        ].trim() !== ""
+                        ? [""]
+                        : [],
+                    )
+                    .map((url, idx) => {
+                      const isMatch = url.trim()
+                        ? matchesUrl(url, activeScript.urlPatterns)
+                        : null;
+                      return (
+                        <div key={idx} className="flex items-center gap-3">
+                          <input
+                            className="input h-9 text-xs font-mono flex-1"
+                            placeholder="Enter URL to test..."
+                            value={url}
+                            onChange={(e) => {
+                              const newUrls = [
+                                ...(activeScript.testUrls || []),
+                              ];
+                              // Ensure the array is long enough
+                              while (newUrls.length <= idx) newUrls.push("");
+                              newUrls[idx] = e.target.value;
+                              handleUpdate(activeScript.id, {
+                                testUrls: newUrls,
+                              });
                             }}
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
+                          />
+                          <div className="w-36 shrink-0">
+                            {url.trim() && (
+                              <div
+                                className={cn(
+                                  "match-result py-1 px-2 text-[10px] w-full justify-center",
+                                  isMatch ? "match" : "no-match",
+                                )}
+                              >
+                                {isMatch ? (
+                                  <Check size={10} strokeWidth={3} />
+                                ) : (
+                                  <AlertCircle size={10} strokeWidth={3} />
+                                )}
+                                <span className="font-semibold uppercase tracking-tight">
+                                  {isMatch ? "Match" : "No match"}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="w-9 shrink-0 flex justify-center">
+                            {idx < (activeScript.testUrls?.length || 0) && (
+                              <button
+                                className="btn-icon p-1 hover:text-danger"
+                                onClick={() => {
+                                  const newUrls = activeScript.testUrls!.filter(
+                                    (_, i) => i !== idx,
+                                  );
+                                  handleUpdate(activeScript.id, {
+                                    testUrls: newUrls,
+                                  });
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
 
