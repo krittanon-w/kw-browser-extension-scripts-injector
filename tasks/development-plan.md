@@ -5,7 +5,7 @@
 > 2. Then make it usable
 > 3. Then make it beautiful
 
-**PRD Reference:** [prd-css-js-injector.md](file:///d:/developments/kw-browser-extensions/tasks/prd-css-js-injector.md)
+**PRD Reference:** [prd-css-js-injector.md](prd-css-js-injector.md)
 
 ---
 
@@ -122,7 +122,7 @@ interface ExtensionState {
 - [x] Pattern `https://example.com/dashboard/*` matches `https://example.com/dashboard/settings`
 - [x] Multiple patterns: returns `true` if any pattern matches
 - [x] Edge cases handled (empty patterns, malformed URLs)
-- [ ] Unit tests pass (if test framework is set up)
+- [x] Unit tests pass (if test framework is set up)
 
 ---
 
@@ -349,10 +349,10 @@ interface ExtensionState {
 - Font: Inter or system-ui
 
 **Acceptance Criteria:**
-- [ ] TailwindCSS configured with custom primary color
-- [ ] shadcn/ui components installed (Button, Switch, Badge, Dialog, Input, Card, Tabs)
-- [ ] Dark mode theme applied globally
-- [ ] `rounded-md` applied consistently
+- [x] TailwindCSS configured with custom primary color
+- [x] shadcn/ui components installed (Button, Switch, Badge, Dialog, Input, Card, Tabs)
+- [x] Dark mode theme applied globally
+- [x] `rounded-md` applied consistently
 
 ---
 
@@ -387,13 +387,13 @@ interface ExtensionState {
 ```
 
 **Acceptance Criteria:**
-- [ ] Split-pane layout with resizable sidebar
-- [ ] Script list in sidebar with type badges (CSS = blue/cyan, JS = yellow/amber)
-- [ ] Active script highlighted in sidebar
-- [ ] All form fields use shadcn/ui components
-- [ ] Dark mode with `#02abff` accents
-- [ ] Consistent `rounded-md` border radius
-- [ ] Lucide React icons for all actions
+- [x] Split-pane layout with resizable sidebar
+- [x] Script list in sidebar with type badges (CSS = blue/cyan, JS = yellow/amber)
+- [x] Active script highlighted in sidebar
+- [x] All form fields use shadcn/ui components
+- [x] Dark mode with `#02abff` accents
+- [x] Consistent `rounded-md` border radius
+- [x] Lucide React icons for all actions
 
 ---
 
@@ -406,13 +406,13 @@ interface ExtensionState {
 | **Deliverables** | Styled popup with shadcn/ui components |
 
 **Acceptance Criteria:**
-- [ ] Dark theme with `#02abff` accents
-- [ ] Script type badges: CSS (cyan), JS (amber)
-- [ ] Clean toggle switches (shadcn/ui Switch)
-- [ ] Hover effects on list items
-- [ ] Smooth transitions on toggle
-- [ ] Settings gear icon with hover effect
-- [ ] Popup opens in under 200ms
+- [x] Dark theme with `#02abff` accents
+- [x] Script type badges: CSS (cyan), JS (amber)
+- [x] Clean toggle switches (shadcn/ui Switch)
+- [x] Hover effects on list items
+- [x] Smooth transitions on toggle
+- [x] Settings gear icon with hover effect
+- [x] Popup opens in under 200ms
 
 ---
 
@@ -433,9 +433,9 @@ interface ExtensionState {
 - Badge count update: brief scale-up
 
 **Acceptance Criteria:**
-- [ ] All animations feel smooth and natural (200–300ms duration)
-- [ ] No janky or blocking animations
-- [ ] Animations respect `prefers-reduced-motion`
+- [x] All animations feel smooth and natural (200–300ms duration)
+- [x] No janky or blocking animations
+- [x] Animations respect `prefers-reduced-motion`
 
 ---
 
@@ -455,10 +455,10 @@ interface ExtensionState {
 - Bundle size optimization (tree-shake unused shadcn/ui components)
 
 **Acceptance Criteria:**
-- [ ] Popup opens and lists scripts in under 200ms
-- [ ] CodeMirror editor loads in under 500ms
-- [ ] Injection happens within 50ms of page load + configured delay
-- [ ] Bundle size is reasonable (< 500KB total for popup, < 1MB for options)
+- [x] Popup opens and lists scripts in under 200ms
+- [x] CodeMirror editor loads in under 500ms
+- [x] Injection happens within 50ms of page load + configured delay
+- [x] Bundle size is reasonable (< 500KB total for popup, < 1MB for options)
 
 ---
 
@@ -471,15 +471,15 @@ interface ExtensionState {
 | **Deliverables** | Bug fixes, edge case handling |
 
 **Test Scenarios:**
-- [ ] Install fresh → create first script → inject → verify
-- [ ] 20+ scripts with various URL patterns → performance OK
-- [ ] Large script (10KB+ code) → storage fallback works
-- [ ] Rapidly toggle scripts → no race conditions
-- [ ] Navigate between pages quickly → injection is stable
-- [ ] Export → uninstall → reinstall → import → all scripts restored
-- [ ] Restricted pages (`chrome://`, `chrome-extension://`) → graceful failure
-- [ ] Multiple tabs with same URL → all get injection
-- [ ] Script with `delayMs: 5000` → verify delayed injection
+- [x] Install fresh → create first script → inject → verify
+- [x] 20+ scripts with various URL patterns → performance OK
+- [x] Large script (10KB+ code) → storage fallback works
+- [x] Rapidly toggle scripts → no race conditions
+- [x] Navigate between pages quickly → injection is stable
+- [x] Export → uninstall → reinstall → import → all scripts restored
+- [x] Restricted pages (`chrome://`, `chrome-extension://`) → graceful failure
+- [x] Multiple tabs with same URL → all get injection
+- [x] Script with `delayMs: 5000` → verify delayed injection
 
 ---
 
@@ -487,12 +487,12 @@ interface ExtensionState {
 
 | # | Deliverable | Status |
 |---|---|---|
-| 3.1 | TailwindCSS + shadcn/ui theme setup | ⬜ |
-| 3.2 | Options page full redesign (split-pane) | ⬜ |
-| 3.3 | Popup visual polish | ⬜ |
-| 3.4 | Micro-animations & transitions | ⬜ |
-| 3.5 | Performance tuning & caching | ⬜ |
-| 3.6 | Final QA & edge case testing | ⬜ |
+| 3.1 | TailwindCSS + shadcn/ui theme setup | ✅ |
+| 3.2 | Options page full redesign (split-pane) | ✅ |
+| 3.3 | Popup visual polish | ✅ |
+| 3.4 | Micro-animations & transitions | ✅ |
+| 3.5 | Performance tuning & caching | ✅ |
+| 3.6 | Final QA & edge case testing | ✅ |
 
 > **Phase 3 Done When:** The extension looks and feels premium. Dark mode, clean typography, smooth animations, fast loading, and zero visual jank.
 
