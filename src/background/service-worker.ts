@@ -31,10 +31,13 @@ function matchesUrlOptimized(url: string, patterns: string[]): boolean {
 }
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  // Status 'complete' is the standard trigger.
-  // We also check for changeInfo.url to handle SPA navigation where status might not change to complete.
-  if (tab.url && (changeInfo.status === 'complete' || changeInfo.url)) {
-    await orchestrateInjection(tabId, tab.url);
+  if (tab.url) {
+    if (changeInfo.status === 'complete') {
+      await orchestrateInjection(tabId, tab.url);
+    } else if (changeInfo.url && changeInfo.status === undefined) {
+      // SPA navigation where status doesn't change
+      await orchestrateInjection(tabId, tab.url);
+    }
   }
 });
 
@@ -123,19 +126,27 @@ async function inject(tabId: number, script: ScriptEntry) {
     if (jsCode) {
       await chrome.scripting.executeScript({
         target: { tabId },
-        world: 'ISOLATED', // The script element will execute in MAIN world anyway
+        world: 'MAIN',
         func: (code: string, delay: number, scriptName: string) => {
           const run = () => {
             try {
               const scriptEl = document.createElement('script');
-              // Wrapping in an IIFE to provide local scope and error catching
-              scriptEl.textContent = `(function() {
+              
+              let trustedCode: any = code;
+              // Bypass Trusted Types if the website enforces it
+              if ((window as any).trustedTypes && (window as any).trustedTypes.createPolicy) {
                 try {
-                  ${code}
-                } catch(e) {
-                  console.error('[Injector] Error in script "${scriptName}":', e);
+                  const policyName = 'kw-injector-' + Math.random().toString(36).slice(2, 9);
+                  const policy = (window as any).trustedTypes.createPolicy(policyName, {
+                    createScript: (s: string) => s
+                  });
+                  trustedCode = policy.createScript(code);
+                } catch (err) {
+                  console.warn('[Injector] Could not create TrustedTypes policy. Injection might fail if strictly enforced.', err);
                 }
-              })();`;
+              }
+              
+              scriptEl.textContent = trustedCode;
               (document.head || document.documentElement).appendChild(scriptEl);
               scriptEl.remove();
             } catch (e) {
