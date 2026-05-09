@@ -53,7 +53,7 @@ The injection engine mitigates this by dynamically querying the `MAIN` world for
 ### Installation
 ```powershell
 # Clone the repository
-git clone <repository_url>
+git clone https://github.com/krittanon-w/kw-browser-extension-scripts-injector.git
 cd kw-browser-extensions
 
 # Install project dependencies

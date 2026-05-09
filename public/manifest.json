@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Scripts Injector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Inject custom CSS and JS into any website based on URL patterns.",
+  "author": "krittanon-w",
+  "homepage_url": "https://github.com/krittanon-w/kw-browser-extension-scripts-injector",
   "permissions": [
     "storage",
     "scripting",
-    "tabs",
-    "activeTab",
-    "notifications"
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
