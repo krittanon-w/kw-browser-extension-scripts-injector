@@ -29,12 +29,5 @@
       "128": "icon.png"
     }
   },
-  "options_page": "src/options/index.html",
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["assets/content.js"],
-      "run_at": "document_start"
-    }
-  ]
+  "options_page": "src/options/index.html"
 }
