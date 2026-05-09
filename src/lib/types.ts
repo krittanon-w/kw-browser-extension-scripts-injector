@@ -6,6 +6,7 @@ export interface ScriptEntry {
   urlPatterns: string[];
   enabled: boolean;
   delayMs: number;
+  testUrls?: string[];
   createdAt: number;
   updatedAt: number;
 }
