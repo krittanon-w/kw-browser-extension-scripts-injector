@@ -340,7 +340,7 @@ function App() {
                       <label className="field-label !mb-0">URL Patterns</label>
                       <button
                         onClick={() => setIsHelpOpen(true)}
-                        className="text-text-muted hover:text-primary transition-colors"
+                        className="text-text-muted hover:text-primary transition-colors cursor-pointer"
                         title="Help"
                       >
                         <HelpCircle size={14} />
@@ -371,7 +371,9 @@ function App() {
 
                 {/* Delay */}
                 <div className="field-group w-48 shrink-0">
-                  <label className="field-label">Injection Delay (ms)</label>
+                  <label className="field-label !mb-0">
+                    Injection Delay (ms)
+                  </label>
                   <input
                     type="number"
                     className="input h-9"
@@ -394,7 +396,7 @@ function App() {
                   <label className="field-label !mb-0">Test URL Matching</label>
                   <button
                     onClick={() => setIsHelpOpen(true)}
-                    className="text-text-muted hover:text-primary transition-colors"
+                    className="text-text-muted hover:text-primary transition-colors cursor-pointer"
                     title="Help"
                   >
                     <HelpCircle size={14} />
@@ -485,7 +487,7 @@ function App() {
                       </span>
                       <button
                         onClick={() => setIsHelpOpen(true)}
-                        className="text-text-muted hover:text-primary transition-colors ml-1"
+                        className="text-text-muted hover:text-primary transition-colors ml-1 cursor-pointer"
                         title="Help"
                       >
                         <HelpCircle size={14} />
@@ -518,7 +520,7 @@ function App() {
                       </span>
                       <button
                         onClick={() => setIsHelpOpen(true)}
-                        className="text-text-muted hover:text-primary transition-colors ml-1"
+                        className="text-text-muted hover:text-primary transition-colors ml-1 cursor-pointer"
                         title="Help"
                       >
                         <HelpCircle size={14} />
