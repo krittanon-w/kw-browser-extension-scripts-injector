@@ -10,8 +10,8 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8 animate-in fade-in duration-200">
-      {/* Semi full screen modal: 90vw width and 90vh height */}
-      <div className="bg-surface-1 border border-border rounded-xl shadow-xl w-full max-w-[90vw] h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+      {/* Semi full screen modal */}
+      <div className="bg-surface-1 border border-border rounded-xl shadow-xl w-[1000px] min-w-[1000px] max-w-[95vw] h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between p-4 px-6 border-b border-border bg-surface-2 rounded-t-xl shrink-0">
           <h2 className="text-xl font-semibold text-text-hi">
@@ -27,163 +27,133 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
         </div>
 
         {/* Scrollable Content */}
-        <div className="p-6 md:p-10 overflow-y-auto flex-1 custom-scrollbar text-text text-base leading-relaxed">
-          <div className="max-w-4xl mx-auto space-y-10">
-            <section>
-              <h2 className="text-2xl font-bold text-text-hi mb-2 pb-2 border-b border-border/50">
-                Overview
-              </h2>
-              <p className="text-text-muted mb-4">
-                This extension allows you to automatically inject custom CSS and
-                JavaScript into specific websites based on URL match patterns.
-              </p>
-            </section>
+        <div className="p-6 md:p-10 lg:p-12 overflow-y-auto flex-1 custom-scrollbar">
+          <div className="max-w-3xl mx-auto text-text-muted pb-10">
+            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-text-hi mb-6">
+              Injector Documentation
+            </h1>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
+              This extension allows you to automatically inject custom CSS and
+              JavaScript into specific websites based on URL match patterns. Use it to customize appearance, automate tasks, or hide elements.
+            </p>
 
-            <section>
-              <h3 className="text-xl font-semibold text-text-hi mb-3">
-                URL Patterns
-              </h3>
-              <p className="mb-3">
-                URL patterns determine exactly which websites your custom code
-                will run on.
-              </p>
+            <h2 className="scroll-m-20 border-b border-border/50 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0 mt-10 mb-6 text-text-hi">
+              URL Patterns
+            </h2>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
+              URL patterns determine exactly which websites your custom code
+              will run on. They must strictly follow the required format to be valid.
+            </p>
 
-              <div className="bg-surface-2 p-4 rounded-lg border border-border/50 mb-4 font-mono text-sm">
-                <span className="text-text-muted">Format: </span>
-                <span className="text-primary">
-                  &lt;scheme&gt;://&lt;host&gt;&lt;path&gt;
-                </span>
-              </div>
+            <blockquote className="mt-6 border-l-2 border-text-muted/30 pl-6 italic text-text-muted/80">
+              "A perfectly written script is useless if it's injected on the wrong domain."
+              <br/>
+              <span className="not-italic font-mono text-sm mt-2 block text-primary">Format: &lt;scheme&gt;://&lt;host&gt;&lt;path&gt;</span>
+            </blockquote>
 
-              <h4 className="font-semibold text-text-hi mb-2">
-                Common Examples:
-              </h4>
-              <ul className="list-disc pl-6 space-y-2 text-text-muted">
-                <li>
-                  <code className="text-primary bg-surface-3 px-1.5 py-0.5 rounded text-sm">
-                    *://*.google.com/*
-                  </code>{" "}
-                  - Matches any Google page (e.g., https://google.com,
-                  http://mail.google.com/mail).
-                </li>
-                <li>
-                  <code className="text-primary bg-surface-3 px-1.5 py-0.5 rounded text-sm">
-                    https://github.com/*
-                  </code>{" "}
-                  - Matches any page on GitHub.
-                </li>
-                <li>
-                  <code className="text-primary bg-surface-3 px-1.5 py-0.5 rounded text-sm">
-                    *://*/*
-                  </code>{" "}
-                  - Matches <strong>every</strong> website (use with caution).
-                </li>
-              </ul>
-              <p className="mt-3 text-sm italic opacity-80">
-                Note: You can specify multiple patterns, one per line.
-              </p>
-            </section>
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mt-8 mb-4 text-text-hi">
+              Common Examples
+            </h3>
+            <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
+              <li>
+                <code className="relative rounded bg-surface-3 px-[0.3rem] py-[0.2rem] font-mono text-sm text-primary">
+                  *://*.google.com/*
+                </code>{" "}
+                - Matches any Google page (e.g., https://google.com,
+                http://mail.google.com).
+              </li>
+              <li>
+                <code className="relative rounded bg-surface-3 px-[0.3rem] py-[0.2rem] font-mono text-sm text-primary">
+                  https://github.com/*
+                </code>{" "}
+                - Matches any page on GitHub.
+              </li>
+              <li>
+                <code className="relative rounded bg-surface-3 px-[0.3rem] py-[0.2rem] font-mono text-sm text-primary">
+                  *://*/*
+                </code>{" "}
+                - Matches <strong>every</strong> website (use with caution).
+              </li>
+            </ul>
+            <p className="leading-7 [&:not(:first-child)]:mt-6 text-sm italic opacity-80">
+              Note: You can specify multiple patterns, one per line.
+            </p>
 
-            <hr className="border-border/50" />
-
-            <section>
-              <h3 className="text-xl font-semibold text-text-hi mb-3">
-                Test URL Matching
-              </h3>
-              <p className="mb-3">
-                Not sure if your pattern is correct? Use the Test URL Matching
-                tool!
-              </p>
-              <ol className="list-decimal pl-6 space-y-2 text-text-muted">
-                <li>
-                  Enter a full URL (e.g.,{" "}
-                  <code className="text-text-hi bg-surface-3 px-1.5 py-0.5 rounded text-sm">
-                    https://github.com/krittanon-w
-                  </code>
-                  ).
-                </li>
-                <li>
-                  The indicator will instantly show{" "}
-                  <strong className="text-success">MATCH</strong> or{" "}
-                  <strong className="text-danger">NO MATCH</strong> based on
-                  your configured URL Patterns above.
-                </li>
-              </ol>
-            </section>
-
-            <hr className="border-border/50" />
-
-            <section>
-              <h3 className="text-xl font-semibold text-text-hi mb-3">
-                Custom CSS
-              </h3>
-              <p className="mb-3">
-                Write standard CSS here. It will be automatically injected into
-                the page as a
-                <code className="text-css bg-surface-3 px-1.5 py-0.5 rounded text-sm mx-1">
-                  &lt;style&gt;
+            <h2 className="scroll-m-20 border-b border-border/50 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0 mt-10 mb-6 text-text-hi">
+              Test URL Matching
+            </h2>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
+              Not sure if your pattern is correct? Use the built-in URL matching
+              tool to verify before injecting.
+            </p>
+            <ol className="my-6 ml-6 list-decimal [&>li]:mt-2">
+              <li>
+                Enter a full URL (e.g.,{" "}
+                <code className="relative rounded bg-surface-3 px-[0.3rem] py-[0.2rem] font-mono text-sm text-text-hi">
+                  https://github.com/krittanon-w
                 </code>
-                tag, overriding the site's default styles.
-              </p>
+                ).
+              </li>
+              <li>
+                The indicator will instantly show{" "}
+                <strong className="text-success font-semibold">MATCH</strong> or{" "}
+                <strong className="text-danger font-semibold">NO MATCH</strong> based on
+                your configured URL Patterns.
+              </li>
+            </ol>
 
-              <h4 className="font-semibold text-text-hi mb-2">
-                Example (Dark mode a site):
-              </h4>
-              <pre className="bg-[#1e1e2e] p-4 rounded-lg overflow-x-auto border border-border font-mono text-sm text-css">
-                {`body {
+            <h2 className="scroll-m-20 border-b border-border/50 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0 mt-10 mb-6 text-text-hi">
+              Custom Scripts & Styles
+            </h2>
+
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mt-8 mb-4 text-text-hi">
+              CSS Example
+            </h3>
+            <p className="leading-7 [&:not(:first-child)]:mt-6 mb-4">
+              Write standard CSS. It will be injected as a{" "}
+              <code className="relative rounded bg-surface-3 px-[0.3rem] py-[0.2rem] font-mono text-sm text-css">
+                &lt;style&gt;
+              </code>{" "}
+              tag. Example (Dark mode a site):
+            </p>
+            <pre className="mb-4 mt-6 overflow-x-auto rounded-lg border border-border bg-[#1e1e2e] p-4 font-mono text-sm text-css shadow-sm">
+              {`body {
   background-color: #121212 !important;
   color: #ffffff !important;
 }`}
-              </pre>
-            </section>
+            </pre>
 
-            <hr className="border-border/50" />
-
-            <section>
-              <h3 className="text-xl font-semibold text-text-hi mb-3">
-                Custom JavaScript
-              </h3>
-              <p className="mb-3">
-                Write vanilla JavaScript here. It runs directly on the page,
-                allowing you to modify the DOM, add event listeners, or automate
-                tasks.
-              </p>
-
-              <h4 className="font-semibold text-text-hi mb-2">
-                Example (Hide a specific element):
-              </h4>
-              <pre className="bg-[#1e1e2e] p-4 rounded-lg overflow-x-auto border border-border font-mono text-sm text-js">
-                {`const adBanner = document.querySelector('.annoying-ad-banner');
+            <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight mt-8 mb-4 text-text-hi">
+              JavaScript Example
+            </h3>
+            <p className="leading-7 [&:not(:first-child)]:mt-6 mb-4">
+              Write vanilla JavaScript to interact directly with the DOM. Example (Hide an element):
+            </p>
+            <pre className="mb-4 mt-6 overflow-x-auto rounded-lg border border-border bg-[#1e1e2e] p-4 font-mono text-sm text-js shadow-sm">
+              {`const adBanner = document.querySelector('.annoying-ad-banner');
 if (adBanner) {
   adBanner.style.display = 'none';
 }`}
-              </pre>
-            </section>
+            </pre>
 
-            <hr className="border-border/50" />
-
-            <section>
-              <h3 className="text-xl font-semibold text-text-hi !mb-0">
-                Injection Delay (ms)
-              </h3>
-              <p className="mb-3">
-                Many modern websites (like React or Next.js apps) load content
-                dynamically <em>after</em> the initial page load. If your script
-                tries to find an element before it exists, it won't work. Use
-                the delay to wait before injecting:
-              </p>
-              <ul className="list-disc pl-6 space-y-3 text-text-muted">
-                <li>
-                  <strong className="text-text-hi">0 ms</strong>: Runs
-                  immediately. Good for static sites or basic CSS.
-                </li>
-                <li>
-                  <strong className="text-text-hi">500 - 1000 ms</strong>: Good
-                  for single-page applications where elements render slightly
-                  after page load.
-                </li>
-              </ul>
-            </section>
+            <h2 className="scroll-m-20 border-b border-border/50 pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0 mt-10 mb-6 text-text-hi">
+              Injection Delay
+            </h2>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
+              Modern websites (React, Next.js, etc.) often load content dynamically.
+              If your script tries to find an element before it exists, it will fail.
+            </p>
+            <ul className="my-6 ml-6 list-disc [&>li]:mt-2">
+              <li>
+                <strong className="text-text-hi font-semibold">0 ms</strong>: Runs
+                immediately. Good for static sites or basic CSS.
+              </li>
+              <li>
+                <strong className="text-text-hi font-semibold">500 - 1000 ms</strong>: Good
+                for single-page applications where elements render slightly
+                after page load.
+              </li>
+            </ul>
           </div>
         </div>
       </div>
