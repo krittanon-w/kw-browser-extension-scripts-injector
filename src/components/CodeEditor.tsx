@@ -11,11 +11,18 @@ interface CodeEditorProps {
   value: string;
   onChange: (value: string) => void;
   language: 'css' | 'js' | 'text';
+  readOnly?: boolean;
 }
 
-export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
+export function CodeEditor({ value, onChange, language, readOnly = false }: CodeEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
+  
+  // Use a ref for onChange to avoid stale closures in the editor's update listener
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -29,9 +36,12 @@ export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
       keymap.of([...defaultKeymap, ...historyKeymap]),
       EditorView.lineWrapping,
       oneDark,
+      EditorState.readOnly.of(readOnly),
+      EditorView.editable.of(!readOnly),
       EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
-          onChange(update.state.doc.toString());
+        // Only trigger onChange if the document actually changed AND we're not in read-only mode
+        if (update.docChanged && !readOnly) {
+          onChangeRef.current(update.state.doc.toString());
         }
       }),
     ];
@@ -54,7 +64,7 @@ export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
     return () => {
       view.destroy();
     };
-  }, [language]); // Re-initialize if language changes
+  }, [language, readOnly]);
 
   // Update editor content if value prop changes from outside
   useEffect(() => {

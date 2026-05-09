@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   Plus,
-  Search,
   Settings,
   Trash2,
   ExternalLink,
@@ -16,10 +15,6 @@ import {
 } from "lucide-react";
 import {
   getAll,
-  addScript,
-  updateScript,
-  deleteScript,
-  setGlobalEnabled,
 } from "../lib/storage";
 import type { ExtensionState, ScriptEntry } from "../lib/types";
 import { CodeEditor } from "../components/CodeEditor";
@@ -38,10 +33,10 @@ function App() {
   const { confirm, element: confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
-    loadState();
+    loadInitialState();
   }, []);
 
-  async function loadState() {
+  async function loadInitialState() {
     const s = await getAll();
     setState(s);
     if (!activeId && s.scripts.length > 0) {
@@ -49,14 +44,35 @@ function App() {
     }
   }
 
-  const filteredScripts = useMemo(() => {
-    if (!state) return [];
+  // Debounced save to storage
+  useEffect(() => {
+    if (!state) return;
+    const timer = setTimeout(() => {
+      // We don't want to loadState after save here to avoid resetting the cursor in editors
+      import("../lib/storage").then(lib => lib.saveAll(state));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [state]);
+
+  const groupedScripts = useMemo(() => {
+    if (!state) return { enabled: [], disabled: [] };
     const query = search.toLowerCase();
-    return state.scripts.filter(
+    const filtered = state.scripts.filter(
       (s) =>
         s.name.toLowerCase().includes(query) ||
         s.urlPatterns.some((p) => p.toLowerCase().includes(query))
     );
+
+    const sorted = [...filtered].sort((a, b) => {
+      const nameA = (a.urlPatterns[0] || "").toLowerCase();
+      const nameB = (b.urlPatterns[0] || "").toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    return {
+      enabled: sorted.filter((s) => s.enabled),
+      disabled: sorted.filter((s) => !s.enabled),
+    };
   }, [state, search]);
 
   const activeScript = useMemo(() => {
@@ -64,9 +80,10 @@ function App() {
   }, [state, activeId]);
 
   async function handleAdd() {
+    if (!state) return;
     const script: ScriptEntry = {
       id: crypto.randomUUID(),
-      name: "", // We'll derive it from patterns now
+      name: "",
       cssCode: "/* Add your CSS here */",
       jsCode: "// Add your JavaScript here",
       urlPatterns: ["*://example.com/*"],
@@ -75,18 +92,22 @@ function App() {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    await addScript(script);
+    
+    setState({ ...state, scripts: [...state.scripts, script] });
     setActiveId(script.id);
-    loadState();
     toast("New injector created", "success");
   }
 
-  async function handleUpdate(id: string, updates: Partial<ScriptEntry>) {
-    await updateScript(id, updates);
-    loadState();
+  function handleUpdate(id: string, updates: Partial<ScriptEntry>) {
+    if (!state) return;
+    const newScripts = state.scripts.map(s => 
+      s.id === id ? { ...s, ...updates, updatedAt: Date.now() } : s
+    );
+    setState({ ...state, scripts: newScripts });
   }
 
   async function handleDelete(id: string) {
+    if (!state) return;
     const ok = await confirm({
       title: "Delete Injector?",
       message: "This action cannot be undone. All code for this injector will be lost.",
@@ -94,11 +115,11 @@ function App() {
       confirmLabel: "Delete permanently",
     });
     if (ok) {
-      await deleteScript(id);
+      const newScripts = state.scripts.filter(s => s.id !== id);
+      setState({ ...state, scripts: newScripts });
       if (activeId === id) {
-        setActiveId(state?.scripts.find((s) => s.id !== id)?.id || null);
+        setActiveId(newScripts[0]?.id || null);
       }
-      loadState();
       toast("Injector deleted", "info");
     }
   }
@@ -106,8 +127,7 @@ function App() {
   async function handleToggleGlobal() {
     if (!state) return;
     const next = !state.globalEnabled;
-    await setGlobalEnabled(next);
-    loadState();
+    setState({ ...state, globalEnabled: next });
     toast(next ? "Extension enabled" : "Extension disabled", "info");
   }
 
@@ -117,6 +137,33 @@ function App() {
   }, [testUrl, activeScript]);
 
   if (!state) return null;
+
+  const renderSidebarItem = (s: ScriptEntry) => (
+    <button
+      key={s.id}
+      className={cn(
+        "sidebar-item sidebar-item-anim",
+        activeId === s.id && "active",
+        !s.enabled && "disabled-item"
+      )}
+      onClick={() => setActiveId(s.id)}
+    >
+      <div className="w-5 h-5 flex items-center justify-center shrink-0">
+        {s.enabled ? (
+          <Check className="text-primary" size={14} strokeWidth={3} />
+        ) : (
+          <div className="w-1.5 h-1.5 rounded-full bg-text-muted opacity-40" />
+        )}
+      </div>
+      <span className="sidebar-item-name">{s.urlPatterns[0] || "No pattern"}</span>
+      {s.cssCode && s.cssCode.trim() !== "/* Add your CSS here */" && (
+        <span className="text-[10px] text-css font-bold opacity-70">CSS</span>
+      )}
+      {s.jsCode && s.jsCode.trim() !== "// Add your JavaScript here" && (
+        <span className="text-[10px] text-js font-bold opacity-70">JS</span>
+      )}
+    </button>
+  );
 
   return (
     <div className="options-layout">
@@ -148,49 +195,33 @@ function App() {
         {/* Sidebar */}
         <aside className="sidebar">
           <div className="sidebar-search">
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                size={14}
-              />
-              <input
-                type="text"
-                className="input pl-9 h-9"
-                placeholder="Search patterns..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+            <input
+              type="text"
+              className="input h-9"
+              placeholder="Search patterns..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
 
           <div className="sidebar-list">
-            <div className="divider-label px-2 mt-2 mb-1">Your Injectors</div>
-            {filteredScripts.map((s) => (
-              <button
-                key={s.id}
-                className={cn(
-                  "sidebar-item sidebar-item-anim",
-                  activeId === s.id && "active",
-                  !s.enabled && "disabled-item"
-                )}
-                onClick={() => setActiveId(s.id)}
-              >
-                <div
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full shrink-0",
-                    s.enabled ? "bg-primary" : "bg-text-muted"
-                  )}
-                />
-                <span className="sidebar-item-name">{s.urlPatterns[0] || "No pattern"}</span>
-                {s.cssCode && s.cssCode.trim() !== "/* Add your CSS here */" && (
-                  <span className="text-[10px] text-css font-bold opacity-70">CSS</span>
-                )}
-                {s.jsCode && s.jsCode.trim() !== "// Add your JavaScript here" && (
-                  <span className="text-[10px] text-js font-bold opacity-70">JS</span>
-                )}
-              </button>
-            ))}
-            {filteredScripts.length === 0 && (
+            {groupedScripts.enabled.length > 0 && (
+              <>
+                <div className="divider-label px-2 mt-2 mb-1">Active</div>
+                {groupedScripts.enabled.map(renderSidebarItem)}
+              </>
+            )}
+
+            {groupedScripts.disabled.length > 0 && (
+              <>
+                <div className={cn("divider-label px-2 mt-4 mb-1", groupedScripts.enabled.length === 0 && "mt-2")}>
+                  Inactive
+                </div>
+                {groupedScripts.disabled.map(renderSidebarItem)}
+              </>
+            )}
+
+            {groupedScripts.enabled.length === 0 && groupedScripts.disabled.length === 0 && (
               <div className="text-center py-8 text-text-muted text-xs">
                 No results found
               </div>
@@ -228,7 +259,7 @@ function App() {
                     }) ? 'merge' : 'replace';
                     try {
                       await importData(file, mode, state);
-                      loadState();
+                      loadInitialState();
                       toast("Import successful", "success");
                     } catch (err: any) {
                       toast(`Import failed: ${err.message}`, "error");
@@ -244,7 +275,7 @@ function App() {
         {/* Main Panel */}
         <main className="main-panel">
           {activeScript ? (
-            <>
+            <div className="main-content-wrapper">
               {/* Toolbar */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-1 flex-1">
@@ -291,6 +322,7 @@ function App() {
                 <textarea
                   className="input font-mono text-xs min-h-[60px]"
                   placeholder="e.g. *://*.google.com/*"
+                  disabled={!activeScript.enabled}
                   value={activeScript.urlPatterns.join("\n")}
                   onChange={(e) =>
                     handleUpdate(activeScript.id, {
@@ -301,15 +333,12 @@ function App() {
                 
                 {/* Test URL */}
                 <div className="mt-2 flex items-center gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={12} />
-                    <input
-                      className="input pl-8 h-8 text-xs"
-                      placeholder="Test matching URL..."
-                      value={testUrl}
-                      onChange={(e) => setTestUrl(e.target.value)}
-                    />
-                  </div>
+                  <input
+                    className="input h-8 text-xs"
+                    placeholder="Test matching URL..."
+                    value={testUrl}
+                    onChange={(e) => setTestUrl(e.target.value)}
+                  />
                   {testUrl && (
                     <div className={cn("match-result", isMatch ? "match" : "no-match")}>
                       {isMatch ? <Check size={12} /> : <AlertCircle size={12} />}
@@ -322,17 +351,15 @@ function App() {
               {/* Delay */}
               <div className="field-group w-48">
                 <label className="field-label">Injection Delay (ms)</label>
-                <div className="relative">
-                  <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
-                  <input
-                    type="number"
-                    className="input pl-9 h-9"
-                    min="0"
-                    step="50"
-                    value={activeScript.delayMs}
-                    onChange={(e) => handleUpdate(activeScript.id, { delayMs: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
+                <input
+                  type="number"
+                  className="input h-9"
+                  min="0"
+                  step="50"
+                  disabled={!activeScript.enabled}
+                  value={activeScript.delayMs}
+                  onChange={(e) => handleUpdate(activeScript.id, { delayMs: parseInt(e.target.value) || 0 })}
+                />
               </div>
 
               {/* Editors */}
@@ -342,10 +369,11 @@ function App() {
                     <FileCode2 className="text-css" size={16} />
                     <span className="text-xs font-semibold uppercase tracking-wider text-css">Custom CSS</span>
                   </div>
-                  <div className="card border-css/30">
+                  <div className={cn("card border-css/30", !activeScript.enabled && "opacity-50")}>
                     <CodeEditor
                       value={activeScript.cssCode}
                       language="css"
+                      readOnly={!activeScript.enabled}
                       onChange={(cssCode) => handleUpdate(activeScript.id, { cssCode })}
                     />
                   </div>
@@ -356,16 +384,17 @@ function App() {
                     <Code2 className="text-js" size={16} />
                     <span className="text-xs font-semibold uppercase tracking-wider text-js">Custom JavaScript</span>
                   </div>
-                  <div className="card border-js/30">
+                  <div className={cn("card border-js/30", !activeScript.enabled && "opacity-50")}>
                     <CodeEditor
                       value={activeScript.jsCode}
                       language="js"
+                      readOnly={!activeScript.enabled}
                       onChange={(jsCode) => handleUpdate(activeScript.id, { jsCode })}
                     />
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           ) : (
             <div className="empty-state">
               <div className="p-6 rounded-full bg-surface-3 mb-4">
