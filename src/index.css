@@ -54,7 +54,7 @@
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
+  text-align: left;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
@@ -108,4 +108,37 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* Switch Styles */
+.switch input {
+  cursor: pointer;
+  width: 34px;
+  height: 18px;
+  appearance: none;
+  background: #ccc;
+  border-radius: 9px;
+  position: relative;
+  transition: .3s;
+  outline: none;
+}
+
+.switch input:checked {
+  background: #02abff;
+}
+
+.switch input:before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: .3s;
+}
+
+.switch input:checked:before {
+  left: 18px;
 }

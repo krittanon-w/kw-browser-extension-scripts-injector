@@ -144,19 +144,16 @@ A Chrome browser extension that allows users to inject custom CSS and JavaScript
 
 ---
 
-### US-007: Extension Popup — Script List Overview
+### US-007: Extension Icon Click — Open Options Page
 
-**Description:** As a user, I want to see a quick overview of all my scripts in the extension popup so that I can manage them without opening a full page.
+**Description:** As a user, I want clicking the extension icon to open the options page directly so that I can manage my scripts without an intermediate popup.
 
 **Acceptance Criteria:**
 
-- [ ] Extension popup shows a list of all scripts with: name, type (CSS/JS badge), URL pattern preview, and enable/disable toggle
-- [ ] Each entry is clickable to navigate to the full editor (opens options page)
-- [ ] Popup has a "New Script" button at the top
-- [ ] Popup has a global enable/disable toggle for the entire extension
-- [ ] Clicking the "Settings" / gear icon opens a **new full desktop tab** (`chrome.tabs.create`) to the options page — no small popup settings panel
-- [ ] Typecheck/lint passes
-- [ ] Verify in browser using dev-browser skill
+- [x] Clicking the extension icon in the toolbar immediately opens the options page in a new tab
+- [x] No small popup window is displayed
+- [x] Typecheck/lint passes
+- [x] Verify in browser using dev-browser skill
 
 ---
 

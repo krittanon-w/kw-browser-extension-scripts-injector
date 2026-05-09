@@ -7,7 +7,8 @@
     "storage",
     "scripting",
     "tabs",
-    "activeTab"
+    "activeTab",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -16,9 +17,7 @@
     "service_worker": "assets/background.js",
     "type": "module"
   },
-  "action": {
-    "default_popup": "src/popup/index.html"
-  },
+  "action": {},
   "options_page": "src/options/index.html",
   "content_scripts": [
     {

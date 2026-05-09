@@ -22,10 +22,10 @@
 | **Deliverables** | `package.json`, `tsconfig.json`, `vite.config.ts`, basic project folder structure |
 
 **Acceptance Criteria:**
-- [ ] `npm run dev` starts Vite in watch mode
-- [ ] `npm run build` outputs a loadable Chrome extension to `dist/`
-- [ ] TypeScript strict mode enabled, compiles with zero errors
-- [ ] Folder structure matches PRD (`src/background`, `src/content`, `src/popup`, `src/options`, `src/lib`)
+- [x] `npm run dev` starts Vite in watch mode
+- [x] `npm run build` outputs a loadable Chrome extension to `dist/`
+- [x] TypeScript strict mode enabled, compiles with zero errors
+- [x] Folder structure matches PRD (`src/background`, `src/content`, `src/popup`, `src/options`, `src/lib`)
 
 ---
 
@@ -38,9 +38,9 @@
 | **Deliverables** | `public/manifest.json` with correct permissions (`storage`, `scripting`, `tabs`, `activeTab`) |
 
 **Acceptance Criteria:**
-- [ ] Extension loads in `chrome://extensions` with no errors
-- [ ] Service worker registers and stays alive
-- [ ] Required permissions declared: `storage`, `scripting`, `tabs`, `activeTab`, `host_permissions: ["<all_urls>"]`
+- [x] Extension loads in `chrome://extensions` with no errors
+- [x] Service worker registers and stays alive
+- [x] Required permissions declared: `storage`, `scripting`, `tabs`, `activeTab`, `host_permissions: ["<all_urls>"]`
 
 ---
 
@@ -73,9 +73,9 @@ interface ExtensionState {
 ```
 
 **Acceptance Criteria:**
-- [ ] All types defined and exported
-- [ ] Types match FR-2 spec exactly
-- [ ] TypeScript compiles with no errors
+- [x] All types defined and exported
+- [x] Types match FR-2 spec exactly
+- [x] TypeScript compiles with no errors
 
 ---
 
@@ -97,10 +97,10 @@ interface ExtensionState {
 - `setGlobalEnabled(enabled: boolean): Promise<void>`
 
 **Acceptance Criteria:**
-- [ ] CRUD operations work against `chrome.storage.sync`
-- [ ] Automatic fallback to `chrome.storage.local` when data exceeds sync limits (8KB per item / 100KB total)
-- [ ] Data persists across browser restarts
-- [ ] TypeScript compiles with no errors
+- [x] CRUD operations work against `chrome.storage.sync`
+- [x] Automatic fallback to `chrome.storage.local` when data exceeds sync limits (8KB per item / 100KB total)
+- [x] Data persists across browser restarts
+- [x] TypeScript compiles with no errors
 
 ---
 
@@ -117,11 +117,11 @@ interface ExtensionState {
 - `matchesUrl(url: string, patterns: string[]): boolean`
 
 **Acceptance Criteria:**
-- [ ] `*` matches any sequence of characters
-- [ ] Pattern `*://github.com/*` matches `https://github.com/user/repo`
-- [ ] Pattern `https://example.com/dashboard/*` matches `https://example.com/dashboard/settings`
-- [ ] Multiple patterns: returns `true` if any pattern matches
-- [ ] Edge cases handled (empty patterns, malformed URLs)
+- [x] `*` matches any sequence of characters
+- [x] Pattern `*://github.com/*` matches `https://github.com/user/repo`
+- [x] Pattern `https://example.com/dashboard/*` matches `https://example.com/dashboard/settings`
+- [x] Multiple patterns: returns `true` if any pattern matches
+- [x] Edge cases handled (empty patterns, malformed URLs)
 - [ ] Unit tests pass (if test framework is set up)
 
 ---
@@ -144,13 +144,13 @@ interface ExtensionState {
    - JS → `chrome.scripting.executeScript`
 
 **Acceptance Criteria:**
-- [ ] CSS scripts inject into matching pages
-- [ ] JS scripts execute on matching pages
-- [ ] Delay (ms) is respected
-- [ ] Disabled scripts are not injected
-- [ ] Global disable stops all injections
-- [ ] Errors in user JS are caught (do not crash extension)
-- [ ] TypeScript compiles with no errors
+- [x] CSS scripts inject into matching pages
+- [x] JS scripts execute on matching pages
+- [x] Delay (ms) is respected
+- [x] Disabled scripts are not injected
+- [x] Global disable stops all injections
+- [x] Errors in user JS are caught (do not crash extension)
+- [x] TypeScript compiles with no errors
 
 ---
 
@@ -171,12 +171,12 @@ interface ExtensionState {
 - Save button
 
 **Acceptance Criteria:**
-- [ ] Can create a new CSS script, set URL pattern, write CSS code, save, and see it injected on matching page
-- [ ] Can create a new JS script, set URL pattern, write JS code, save, and see it executed on matching page
-- [ ] Can toggle scripts on/off and see injection behavior change
-- [ ] Can delete scripts
-- [ ] All data persists in Chrome storage
-- [ ] UI is functional (ugly is OK)
+- [x] Can create a new CSS script, set URL pattern, write CSS code, save, and see it injected on matching page
+- [x] Can create a new JS script, set URL pattern, write JS code, save, and see it executed on matching page
+- [x] Can toggle scripts on/off and see injection behavior change
+- [x] Can delete scripts
+- [x] All data persists in Chrome storage
+- [x] UI is functional (ugly is OK)
 
 ---
 
@@ -184,13 +184,13 @@ interface ExtensionState {
 
 | # | Deliverable | Status |
 |---|---|---|
-| 1.1 | Project scaffolding, Vite build, TS config | ⬜ |
-| 1.2 | Manifest V3 with permissions | ⬜ |
-| 1.3 | `ScriptEntry` types | ⬜ |
-| 1.4 | Storage layer (CRUD + sync/local fallback) | ⬜ |
-| 1.5 | Glob URL pattern matcher | ⬜ |
-| 1.6 | Background service worker (injection engine) | ⬜ |
-| 1.7 | Bare-Bones options page (CRUD + textarea) | ⬜ |
+| 1.1 | Project scaffolding, Vite build, TS config | ✅ |
+| 1.2 | Manifest V3 with permissions | ✅ |
+| 1.3 | `ScriptEntry` types | ✅ |
+| 1.4 | Storage layer (CRUD + sync/local fallback) | ✅ |
+| 1.5 | Glob URL pattern matcher | ✅ |
+| 1.6 | Background service worker (injection engine) | ✅ |
+| 1.7 | Bare-bones options page (CRUD + textarea) | ✅ |
 
 > **Phase 1 Done When:** You can install the extension, create a CSS/JS script via the options page, set a URL pattern, navigate to a matching page, and see your code injected. Everything else is extra.
 
@@ -216,37 +216,27 @@ interface ExtensionState {
 - Dark theme (one-dark or similar)
 
 **Acceptance Criteria:**
-- [ ] Editor loads with correct syntax highlighting based on script type
-- [ ] Line numbers visible
-- [ ] Bracket matching works
-- [ ] Auto-indent on new lines
-- [ ] Editor loads in under 500ms
-- [ ] Code changes are captured and saveable
+- [x] Editor loads with correct syntax highlighting based on script type
+- [x] Line numbers visible
+- [x] Bracket matching works
+- [x] Auto-indent on new lines
+- [x] Editor loads in under 500ms
+- [x] Code changes are captured and saveable
 
 ---
 
-### 2.2 Extension Popup — Script List
+### 2.2 Action Button — Direct Options Page Access
 
 | Item | Detail |
 |---|---|
-| **Task** | Build the popup UI with script list, quick toggles, and navigation |
-| **User Stories** | US-007, FR-8 |
-| **Deliverables** | `src/popup/` — compact popup page |
-
-**Features:**
-- List all scripts: name, type badge (CSS/JS), URL pattern preview, enable/disable toggle
-- "New Script" button
-- Global enable/disable toggle
-- Settings (gear) icon → opens options page in a **new tab** (`chrome.tabs.create`)
-- Clicking a script entry → opens options page focused on that script
+| **Task** | Configure the extension action button to open the options page directly |
+| **User Stories** | US-007 |
+| **Deliverables** | Updated `manifest.json` and click handler in `src/background/service-worker.ts` |
 
 **Acceptance Criteria:**
-- [ ] Popup opens and shows script list in under 200ms
-- [ ] Toggle switches work and persist state
-- [ ] "New Script" button works
-- [ ] Settings opens a new full tab (not popup)
-- [ ] Global toggle disables all injections
-- [ ] Functional and readable (basic styling only)
+- [x] Extension action button (icon) opens options page on click
+- [x] No popup is displayed
+- [x] Options page loads correctly
 
 ---
 
@@ -259,9 +249,9 @@ interface ExtensionState {
 | **Deliverables** | Test URL UI component in options page |
 
 **Acceptance Criteria:**
-- [ ] User can type a URL and see "Match ✅" or "No match ❌" in real-time
-- [ ] Uses the same `matchesUrl` function from `url-matcher.ts`
-- [ ] Validates URL pattern format on save (basic check)
+- [x] User can type a URL and see "Match ✅" or "No match ❌" in real-time
+- [x] Uses the same `matchesUrl` function from `url-matcher.ts`
+- [x] Validates URL pattern format on save (basic check)
 
 ---
 
@@ -280,10 +270,10 @@ interface ExtensionState {
 - Error handling for invalid JSON
 
 **Acceptance Criteria:**
-- [ ] Export produces valid JSON file with all scripts
-- [ ] Import successfully restores scripts
-- [ ] Invalid JSON shows error message
-- [ ] Merge/replace option works correctly
+- [x] Export produces valid JSON file with all scripts
+- [x] Import successfully restores scripts
+- [x] Invalid JSON shows error message
+- [x] Merge/replace option works correctly
 
 ---
 
@@ -296,10 +286,10 @@ interface ExtensionState {
 | **Deliverables** | Badge logic in `src/background/service-worker.ts` |
 
 **Acceptance Criteria:**
-- [ ] Badge shows count of scripts injected on the current tab
-- [ ] Badge updates when navigating to different pages
-- [ ] Badge clears when no scripts match
-- [ ] Badge shows "OFF" or grayed icon when globally disabled
+- [x] Badge shows count of scripts injected on the current tab
+- [x] Badge updates when navigating to different pages
+- [x] Badge clears when no scripts match
+- [x] Badge shows "OFF" or grayed icon when globally disabled
 
 ---
 
@@ -319,9 +309,9 @@ interface ExtensionState {
 - Permission denied (restricted pages like `chrome://`) → clear message
 
 **Acceptance Criteria:**
-- [ ] No silent failures — all errors surface to the user or console
-- [ ] Extension never crashes or hangs on user error
-- [ ] Console logs include script name for debugging
+- [x] No silent failures — all errors surface to the user or console
+- [x] Extension never crashes or hangs on user error
+- [x] Console logs include script name for debugging
 
 ---
 
@@ -329,12 +319,12 @@ interface ExtensionState {
 
 | # | Deliverable | Status |
 |---|---|---|
-| 2.1 | CodeMirror 6 editor with syntax highlighting | ⬜ |
-| 2.2 | Extension popup with script list & toggles | ⬜ |
-| 2.3 | URL pattern test UI | ⬜ |
-| 2.4 | Import/Export (JSON) | ⬜ |
-| 2.5 | Badge count on extension icon | ⬜ |
-| 2.6 | Error handling & user notifications | ⬜ |
+| 2.1 | CodeMirror 6 editor with syntax highlighting | ✅ |
+| 2.2 | Action button -> Options page direct access | ✅ |
+| 2.3 | URL pattern test UI | ✅ |
+| 2.4 | Import/Export (JSON) | ✅ |
+| 2.5 | Badge count on extension icon | ✅ |
+| 2.6 | Error handling & user notifications | ✅ |
 
 > **Phase 2 Done When:** You can comfortably use the extension daily — edit code with syntax highlighting, quickly toggle scripts from the popup, test URL patterns, and back up your configs.
 

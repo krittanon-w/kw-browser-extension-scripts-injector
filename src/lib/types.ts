@@ -1,11 +1,9 @@
 export interface ScriptEntry {
   id: string;
-  name: string;
-  type: 'css' | 'js';
-  code: string;
+  cssCode: string;
+  jsCode: string;
   urlPatterns: string[];
   enabled: boolean;
-  delayMs: number;
   createdAt: number;
   updatedAt: number;
 }
