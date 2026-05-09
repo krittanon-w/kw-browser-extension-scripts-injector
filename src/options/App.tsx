@@ -12,6 +12,7 @@ import {
   Download,
   Upload,
   X,
+  HelpCircle,
 } from "lucide-react";
 import { getAll } from "../lib/storage";
 import type { ExtensionState, ScriptEntry } from "../lib/types";
@@ -21,6 +22,7 @@ import { matchesUrl } from "../lib/url-matcher";
 import { Switch } from "../components/ui/Switch";
 import { ToastProvider, toast } from "../components/ui/Toast";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
+import { HelpModal } from "../components/HelpModal";
 import { cn } from "../components/ui/cn";
 import {
   formatRelativeTime,
@@ -32,6 +34,7 @@ function App() {
   const [state, setState] = useState<ExtensionState | null>(null);
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const { confirm, element: confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
@@ -150,7 +153,7 @@ function App() {
         )}
       </div>
       <span className="sidebar-item-name">
-        {(s.urlPatterns[0] || "No pattern").split('\n')[0]}
+        {(s.urlPatterns[0] || "No pattern").split("\n")[0]}
       </span>
       {s.cssCode && s.cssCode.trim() !== "/* Add your CSS here */" && (
         <span className="text-[10px] text-css font-bold opacity-70">CSS</span>
@@ -165,6 +168,7 @@ function App() {
     <div className="options-layout">
       <ToastProvider />
       {confirmDialog}
+      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
 
       {/* Header */}
       <header className="options-header">
@@ -179,6 +183,14 @@ function App() {
             checked={state.globalEnabled}
             onChange={handleToggleGlobal}
           />
+          <div className="w-[1px] h-6 bg-border mx-1" />
+          <button
+            className="btn btn-secondary p-2 rounded-full"
+            onClick={() => setIsHelpOpen(true)}
+            title="Help & Documentation"
+          >
+            <HelpCircle size={18} />
+          </button>
         </div>
       </header>
 
@@ -324,7 +336,16 @@ function App() {
                 {/* URL Patterns */}
                 <div className="field-group flex-1">
                   <div className="flex items-center justify-between">
-                    <label className="field-label">URL Patterns</label>
+                    <div className="flex items-center gap-2">
+                      <label className="field-label !mb-0">URL Patterns</label>
+                      <button
+                        onClick={() => setIsHelpOpen(true)}
+                        className="text-text-muted hover:text-primary transition-colors"
+                        title="Help"
+                      >
+                        <HelpCircle size={14} />
+                      </button>
+                    </div>
                     <a
                       href="https://developer.chrome.com/docs/extensions/mv3/match_patterns/"
                       target="_blank"
@@ -369,7 +390,16 @@ function App() {
 
               {/* Test URL Matching */}
               <div className="field-group mt-2">
-                <label className="field-label">Test URL Matching</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="field-label !mb-0">Test URL Matching</label>
+                  <button
+                    onClick={() => setIsHelpOpen(true)}
+                    className="text-text-muted hover:text-primary transition-colors"
+                    title="Help"
+                  >
+                    <HelpCircle size={14} />
+                  </button>
+                </div>
                 <div className="flex flex-col gap-2">
                   {(activeScript.testUrls || [""])
                     .concat(
@@ -448,10 +478,19 @@ function App() {
               <div className="grid grid-cols-1 gap-6 mt-2">
                 <div className="editor-section">
                   <div className="editor-section-header">
-                    <FileCode2 className="text-css" size={16} />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-css">
-                      Custom CSS
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <FileCode2 className="text-css" size={16} />
+                      <span className="text-xs font-semibold uppercase tracking-wider text-css">
+                        Custom CSS
+                      </span>
+                      <button
+                        onClick={() => setIsHelpOpen(true)}
+                        className="text-text-muted hover:text-primary transition-colors ml-1"
+                        title="Help"
+                      >
+                        <HelpCircle size={14} />
+                      </button>
+                    </div>
                   </div>
                   <div
                     className={cn(
@@ -472,10 +511,19 @@ function App() {
 
                 <div className="editor-section">
                   <div className="editor-section-header">
-                    <Code2 className="text-js" size={16} />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-js">
-                      Custom JavaScript
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <Code2 className="text-js" size={16} />
+                      <span className="text-xs font-semibold uppercase tracking-wider text-js">
+                        Custom JavaScript
+                      </span>
+                      <button
+                        onClick={() => setIsHelpOpen(true)}
+                        className="text-text-muted hover:text-primary transition-colors ml-1"
+                        title="Help"
+                      >
+                        <HelpCircle size={14} />
+                      </button>
+                    </div>
                   </div>
                   <div
                     className={cn(
