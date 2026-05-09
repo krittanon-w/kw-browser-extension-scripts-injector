@@ -84,7 +84,7 @@ function App() {
       name: "",
       cssCode: "/* Add your CSS here */\n\n\n\n\n\n\n\n\n",
       jsCode: "// Add your JavaScript here\n\n\n\n\n\n\n\n\n",
-      urlPatterns: ["*://example.com/*"],
+      urlPatterns: ["*://example.com/url1/*\n*://example.com/url2/*"],
       enabled: true,
       delayMs: 500,
       createdAt: Date.now(),
@@ -150,7 +150,7 @@ function App() {
         )}
       </div>
       <span className="sidebar-item-name">
-        {s.urlPatterns[0] || "No pattern"}
+        {(s.urlPatterns[0] || "No pattern").split('\n')[0]}
       </span>
       {s.cssCode && s.cssCode.trim() !== "/* Add your CSS here */" && (
         <span className="text-[10px] text-css font-bold opacity-70">CSS</span>
@@ -319,35 +319,58 @@ function App() {
 
               <div className="sep" />
 
-              {/* URL Patterns */}
-              <div className="field-group">
-                <div className="flex items-center justify-between">
-                  <label className="field-label">URL Patterns</label>
-                  <a
-                    href="https://developer.chrome.com/docs/extensions/mv3/match_patterns/"
-                    target="_blank"
-                    className="text-[10px] text-primary hover:underline flex items-center gap-1"
-                  >
-                    View Syntax <ExternalLink size={10} />
-                  </a>
+              {/* URL Patterns & Delay Row */}
+              <div className="flex gap-4 items-start">
+                {/* URL Patterns */}
+                <div className="field-group flex-1">
+                  <div className="flex items-center justify-between">
+                    <label className="field-label">URL Patterns</label>
+                    <a
+                      href="https://developer.chrome.com/docs/extensions/mv3/match_patterns/"
+                      target="_blank"
+                      className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                    >
+                      View Syntax <ExternalLink size={10} />
+                    </a>
+                  </div>
+                  <textarea
+                    className="input font-mono text-xs min-h-[60px]"
+                    placeholder="e.g. *://*.google.com/*"
+                    disabled={!activeScript.enabled}
+                    value={activeScript.urlPatterns.join("\n")}
+                    onChange={(e) =>
+                      handleUpdate(activeScript.id, {
+                        urlPatterns: e.target.value
+                          .split("\n")
+                          .filter((p) => p.trim()),
+                      })
+                    }
+                  />
                 </div>
-                <textarea
-                  className="input font-mono text-xs min-h-[60px]"
-                  placeholder="e.g. *://*.google.com/*"
-                  disabled={!activeScript.enabled}
-                  value={activeScript.urlPatterns.join("\n")}
-                  onChange={(e) =>
-                    handleUpdate(activeScript.id, {
-                      urlPatterns: e.target.value
-                        .split("\n")
-                        .filter((p) => p.trim()),
-                    })
-                  }
-                />
 
-                {/* Test URLs - Dynamic List */}
-                <div className="mt-4 flex flex-col gap-2">
-                  <label className="field-label">Test URL Matching</label>
+                {/* Delay */}
+                <div className="field-group w-48 shrink-0">
+                  <label className="field-label">Injection Delay (ms)</label>
+                  <input
+                    type="number"
+                    className="input h-9"
+                    min="0"
+                    step="50"
+                    disabled={!activeScript.enabled}
+                    value={activeScript.delayMs}
+                    onChange={(e) =>
+                      handleUpdate(activeScript.id, {
+                        delayMs: parseInt(e.target.value) || 0,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Test URL Matching */}
+              <div className="field-group mt-2">
+                <label className="field-label">Test URL Matching</label>
+                <div className="flex flex-col gap-2">
                   {(activeScript.testUrls || [""])
                     .concat(
                       (activeScript.testUrls?.length || 0) > 0 &&
@@ -419,24 +442,6 @@ function App() {
                       );
                     })}
                 </div>
-              </div>
-
-              {/* Delay */}
-              <div className="field-group w-48">
-                <label className="field-label">Injection Delay (ms)</label>
-                <input
-                  type="number"
-                  className="input h-9"
-                  min="0"
-                  step="50"
-                  disabled={!activeScript.enabled}
-                  value={activeScript.delayMs}
-                  onChange={(e) =>
-                    handleUpdate(activeScript.id, {
-                      delayMs: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
               </div>
 
               {/* Editors */}

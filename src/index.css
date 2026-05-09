@@ -427,6 +427,7 @@ textarea.input {
 }
 .sidebar-item-name {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -457,6 +458,7 @@ textarea.input {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  margin-bottom: 200px;
 }
 
 /* Empty state */
