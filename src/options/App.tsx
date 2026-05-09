@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { getAll } from "../lib/storage";
 import type { ExtensionState, ScriptEntry } from "../lib/types";
 import { exportData, importData } from "../lib/import-export";
-import { ToastProvider, toast } from "../components/ui/Toast";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
 
 // Components
@@ -111,9 +110,8 @@ function App() {
     try {
       await importData(file, mode, state);
       loadInitialState();
-      toast("Import successful", "success");
     } catch (err: any) {
-      toast(`Import failed: ${err.message}`, "error");
+      alert(`Import failed: ${err.message}`);
     }
   }
 
@@ -121,7 +119,6 @@ function App() {
 
   return (
     <div className="options-layout bg-surface-1">
-      <ToastProvider />
       {confirmDialog}
 
       <Header 

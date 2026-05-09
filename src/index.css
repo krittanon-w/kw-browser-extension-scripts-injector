@@ -525,50 +525,6 @@ textarea.input {
   gap: 0.5rem;
 }
 
-/* Toast / notification strip */
-.toast-bar {
-  position: fixed;
-  bottom: 1.25rem;
-  right: 1.25rem;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  pointer-events: none;
-}
-.toast {
-  padding: 0.625rem 1rem;
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: #fff;
-  pointer-events: auto;
-  animation: slideInToast 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  max-width: 320px;
-}
-.toast.success {
-  background: #166534;
-  border: 1px solid #22c55e44;
-}
-.toast.error {
-  background: #7f1d1d;
-  border: 1px solid #ef444444;
-}
-.toast.info {
-  background: #0c4a6e;
-  border: 1px solid #02abff44;
-}
-
-@keyframes slideInToast {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Dialog / modal */
 .dialog-backdrop {
