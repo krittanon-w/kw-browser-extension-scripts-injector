@@ -22,7 +22,11 @@ import { Switch } from "../components/ui/Switch";
 import { ToastProvider, toast } from "../components/ui/Toast";
 import { useConfirmDialog } from "../components/ui/ConfirmDialog";
 import { cn } from "../components/ui/cn";
-import { formatRelativeTime, formatDateTime } from "../lib/date-utils";
+import {
+  formatRelativeTime,
+  formatDateTime,
+  formatDate,
+} from "../lib/date-utils";
 
 function App() {
   const [state, setState] = useState<ExtensionState | null>(null);
@@ -243,14 +247,14 @@ function App() {
 
             <div className="flex gap-2">
               <button
-                className="btn btn-ghost flex-1 justify-center px-0"
+                className="btn btn-secondary flex-1 justify-center px-0"
                 title="Export JSON"
                 onClick={() => exportData(state)}
               >
                 <Download size={14} />
               </button>
               <label
-                className="btn btn-ghost flex-1 justify-center px-0 cursor-pointer"
+                className="btn btn-secondary flex-1 justify-center px-0 cursor-pointer"
                 title="Import JSON"
               >
                 <Upload size={14} />
@@ -297,7 +301,8 @@ function App() {
                   <div className="text-xs text-text-muted flex items-center gap-2">
                     <Clock size={12} />
                     <span title={formatDateTime(activeScript.updatedAt)}>
-                      Last updated: {formatRelativeTime(activeScript.updatedAt)}
+                      Last updated: {formatDate(activeScript.updatedAt)} |{" "}
+                      {formatRelativeTime(activeScript.updatedAt)}
                     </span>
                   </div>
                 </div>
@@ -314,7 +319,7 @@ function App() {
                   />
                   <div className="w-[1px] h-6 bg-border mx-1" />
                   <button
-                    className="btn-icon danger"
+                    className="btn btn-outline-danger p-2 rounded-md"
                     onClick={() => handleDelete(activeScript.id)}
                     title="Delete Injector"
                   >
@@ -407,7 +412,7 @@ function App() {
                           <div className="w-9 shrink-0 flex justify-center">
                             {idx < (activeScript.testUrls?.length || 0) && (
                               <button
-                                className="btn-icon p-1 hover:text-danger"
+                                className="btn btn-outline-danger p-1 rounded-md"
                                 onClick={() => {
                                   const newUrls = activeScript.testUrls!.filter(
                                     (_, i) => i !== idx,

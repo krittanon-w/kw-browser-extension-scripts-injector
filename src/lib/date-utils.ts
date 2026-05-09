@@ -26,3 +26,7 @@ export function formatDateTime(timestamp: number): string {
     second: '2-digit'
   });
 }
+export function formatDate(timestamp: number): string {
+  const d = new Date(timestamp);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}

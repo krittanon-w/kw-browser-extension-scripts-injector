@@ -26,9 +26,9 @@ export function ConfirmDialog({
         <h3>{title}</h3>
         <p>{message}</p>
         <div className="dialog-actions">
-          <button className="btn btn-ghost" onClick={onCancel}>{cancelLabel}</button>
+          <button className="btn btn-secondary" onClick={onCancel}>{cancelLabel}</button>
           <button
-            className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`}
+            className={`btn ${danger ? 'btn-outline-danger' : 'btn-primary'}`}
             onClick={onConfirm}
           >
             {confirmLabel}
