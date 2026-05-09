@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "CSS & JS Injector",
+  "version": "1.0.0",
+  "description": "Inject custom CSS and JS into any website based on URL patterns.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "assets/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html"
+  },
+  "options_page": "src/options/index.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["assets/content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
