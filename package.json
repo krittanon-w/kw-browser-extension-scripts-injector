@@ -1,5 +1,5 @@
 {
-  "name": "kw-browser-extensions",
+  "name": "kw-browser-extension-scripts-injector",
   "private": true,
   "version": "0.0.0",
   "type": "module",
