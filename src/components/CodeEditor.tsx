@@ -27,6 +27,7 @@ export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
       bracketMatching(),
       indentOnInput(),
       keymap.of([...defaultKeymap, ...historyKeymap]),
+      EditorView.lineWrapping,
       oneDark,
       EditorView.updateListener.of((update) => {
         if (update.docChanged) {

@@ -88,9 +88,9 @@ function App() {
         <h2 style={{ marginBottom: '1.5rem' }}>Injectors</h2>
         {state.scripts.length === 0 && <p style={{ color: '#666' }}>No injectors configured yet.</p>}
         {state.scripts.map(script => (
-          <div key={script.id} style={{ border: '1px solid #eee', borderRadius: '12px', padding: '2rem', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', backgroundColor: '#fff' }}>
+          <div key={script.id} style={{ border: '1px solid #eee', borderRadius: '12px', padding: '2rem', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', backgroundColor: '#fff', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ flex: 1, display: 'flex', gap: '1rem', alignItems: 'center', overflow: 'hidden', minWidth: 0 }}>
                 {editingId !== script.id && (
                   <span style={{ fontSize: '1.2rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: script.enabled ? '#333' : '#999' }}>
                     {script.urlPatterns[0] || 'No patterns'}
@@ -150,7 +150,7 @@ function App() {
             </div>
 
             {editingId === script.id && (
-              <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem', minWidth: 0, width: '100%' }}>
                 <div>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.8rem', color: '#888', fontWeight: 'normal' }}>URL Patterns (one per line)</h3>
                   <CodeEditor 
