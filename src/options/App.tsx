@@ -1,4 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  Plus,
+  Search,
+  Settings,
+  Trash2,
+  ExternalLink,
+  Code2,
+  FileCode2,
+  Check,
+  AlertCircle,
+  Clock,
+  Layout,
+  Download,
+  Upload,
+} from "lucide-react";
 import {
   getAll,
   addScript,
@@ -9,11 +24,18 @@ import {
 import type { ExtensionState, ScriptEntry } from "../lib/types";
 import { CodeEditor } from "../components/CodeEditor";
 import { exportData, importData } from "../lib/import-export";
+import { matchesUrl } from "../lib/url-matcher";
+import { Switch } from "../components/ui/Switch";
+import { ToastProvider, toast } from "../components/ui/Toast";
+import { useConfirmDialog } from "../components/ui/ConfirmDialog";
+import { cn } from "../components/ui/cn";
 
 function App() {
   const [state, setState] = useState<ExtensionState | null>(null);
-  const [newPattern, setNewPattern] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [testUrl, setTestUrl] = useState("");
+  const { confirm, element: confirmDialog } = useConfirmDialog();
 
   useEffect(() => {
     loadState();
@@ -22,22 +44,41 @@ function App() {
   async function loadState() {
     const s = await getAll();
     setState(s);
+    if (!activeId && s.scripts.length > 0) {
+      setActiveId(s.scripts[0].id);
+    }
   }
 
+  const filteredScripts = useMemo(() => {
+    if (!state) return [];
+    const query = search.toLowerCase();
+    return state.scripts.filter(
+      (s) =>
+        s.name.toLowerCase().includes(query) ||
+        s.urlPatterns.some((p) => p.toLowerCase().includes(query))
+    );
+  }, [state, search]);
+
+  const activeScript = useMemo(() => {
+    return state?.scripts.find((s) => s.id === activeId) || null;
+  }, [state, activeId]);
+
   async function handleAdd() {
-    if (!newPattern.trim()) return;
     const script: ScriptEntry = {
       id: crypto.randomUUID(),
-      cssCode: "",
-      jsCode: "",
-      urlPatterns: [newPattern.trim()],
+      name: "", // We'll derive it from patterns now
+      cssCode: "/* Add your CSS here */",
+      jsCode: "// Add your JavaScript here",
+      urlPatterns: ["*://example.com/*"],
       enabled: true,
+      delayMs: 500,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
     await addScript(script);
-    setNewPattern("");
+    setActiveId(script.id);
     loadState();
+    toast("New injector created", "success");
   }
 
   async function handleUpdate(id: string, updates: Partial<ScriptEntry>) {
@@ -46,393 +87,302 @@ function App() {
   }
 
   async function handleDelete(id: string) {
-    if (window.confirm("Delete this injector?")) {
+    const ok = await confirm({
+      title: "Delete Injector?",
+      message: "This action cannot be undone. All code for this injector will be lost.",
+      danger: true,
+      confirmLabel: "Delete permanently",
+    });
+    if (ok) {
       await deleteScript(id);
+      if (activeId === id) {
+        setActiveId(state?.scripts.find((s) => s.id !== id)?.id || null);
+      }
       loadState();
+      toast("Injector deleted", "info");
     }
   }
 
   async function handleToggleGlobal() {
     if (!state) return;
-    await setGlobalEnabled(!state.globalEnabled);
+    const next = !state.globalEnabled;
+    await setGlobalEnabled(next);
     loadState();
+    toast(next ? "Extension enabled" : "Extension disabled", "info");
   }
 
-  if (!state) return <div style={{ padding: "2rem" }}>Loading...</div>;
+  const isMatch = useMemo(() => {
+    if (!testUrl || !activeScript) return null;
+    return matchesUrl(testUrl, activeScript.urlPatterns);
+  }, [testUrl, activeScript]);
+
+  if (!state) return null;
 
   return (
-    <div
-      data-ref="options-page"
-      style={{
-        padding: "2rem",
-        fontFamily: "sans-serif",
-        maxWidth: "1000px",
-        width: "100%",
-        margin: "0 auto",
-        boxSizing: "border-box",
-      }}
-    >
-      <h1>CSS & JS Injector Options</h1>
+    <div className="options-layout">
+      <ToastProvider />
+      {confirmDialog}
 
-      {/* Global master toggle */}
-      <div
-        data-ref="global-toggle"
-        style={{
-          marginBottom: "3rem",
-          padding: "1.5rem",
-          border: "1px solid #eee",
-          borderRadius: "12px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          backgroundColor: "#fff",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <span style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#333" }}>
-          Enable / Disable Extension
-        </span>
-        <label
-          className="switch"
-          data-ref="global-toggle-switch"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            cursor: "pointer",
-            transform: "scale(1.5)",
-            marginRight: "1rem",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={state.globalEnabled}
-            onChange={handleToggleGlobal}
-          />
-        </label>
-      </div>
+      {/* Header */}
+      <header className="options-header">
+        <div className="options-header-title">
+          <Layout className="options-header-logo" size={20} />
+          <span>CSS & JS Injector</span>
+        </div>
 
-      {/* Create new injector form */}
-      <section
-        data-ref="create-injector-section"
-        style={{
-          marginBottom: "3rem",
-          padding: "1.5rem",
-          border: "1px solid #eee",
-          borderRadius: "8px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>Create New Injector</h2>
-        <div
-          data-ref="create-injector-form"
-          style={{ display: "flex", gap: "1rem" }}
-        >
-          <input
-            data-ref="create-injector-input"
-            style={{
-              flex: 1,
-              padding: "0.6rem",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-            }}
-            placeholder="Enter a URL pattern (e.g. *://example.com/*)..."
-            value={newPattern}
-            onChange={(e) => setNewPattern(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          />
-          <button
-            data-ref="create-injector-btn"
-            style={{
-              padding: "0.6rem 2rem",
-              borderRadius: "4px",
-              border: "none",
-              background: "#02abff",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={handleAdd}
+        <div className="flex items-center gap-4">
+          <div
+            className={cn("global-toggle-pill", state.globalEnabled && "on")}
+            onClick={handleToggleGlobal}
           >
-            Create
+            <div className="w-2 h-2 rounded-full bg-current" />
+            <span>{state.globalEnabled ? "Active" : "Paused"}</span>
+          </div>
+          <button className="btn-icon">
+            <Settings size={18} />
           </button>
         </div>
-      </section>
+      </header>
 
-      {/* Injectors list */}
-      <section data-ref="injectors-list">
-        <h2 style={{ marginBottom: "1.5rem" }}>Injectors</h2>
-        {state.scripts.length === 0 && (
-          <p style={{ color: "#666" }}>No injectors configured yet.</p>
-        )}
-        {state.scripts.map((script) => (
-          <div
-            key={script.id}
-            data-ref="injector-card"
-            data-injector-id={script.id}
-            style={{
-              border: "1px solid #eee",
-              borderRadius: "12px",
-              padding: "2rem",
-              marginBottom: "2rem",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-              backgroundColor: "#fff",
-              overflow: "hidden",
-              width: "100%",
-              boxSizing: "border-box",
-            }}
-          >
-            {/* Card header row */}
-            <div
-              data-ref="injector-card-header"
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div
-                data-ref="injector-card-title"
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  gap: "1rem",
-                  alignItems: "center",
-                  overflow: "hidden",
-                  minWidth: 0,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "1.2rem",
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    color: script.enabled ? "#333" : "#999",
-                    visibility: editingId === script.id ? "hidden" : "visible",
-                  }}
-                >
-                  {script.urlPatterns[0] || "No patterns"}
-                </span>
-              </div>
-              <div
-                data-ref="injector-card-actions"
-                style={{ display: "flex", gap: "1rem", alignItems: "center" }}
-              >
-                {/* Enable/Disable toggle */}
-                <label
-                  className="switch"
-                  data-ref="injector-toggle-switch"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={script.enabled}
-                    onChange={() => {
-                      const newEnabled = !script.enabled;
-                      handleUpdate(script.id, { enabled: newEnabled });
-                      if (!newEnabled && editingId === script.id) {
-                        setEditingId(null);
-                      }
-                    }}
-                  />
-                  <span style={{ fontSize: "1rem", color: "#666" }}>
-                    {script.enabled ? "On" : "Off"}
-                  </span>
-                </label>
-
-                {/* Edit / Close button */}
-                <button
-                  data-ref="injector-edit-btn"
-                  style={{
-                    minWidth: "100px",
-                    padding: "0.6rem 1rem",
-                    borderRadius: "6px",
-                    border: "none",
-                    background: "#02abff",
-                    color: "#fff",
-                    cursor: script.enabled ? "pointer" : "not-allowed",
-                    fontWeight: "bold",
-                    opacity: script.enabled ? 1 : 0.5,
-                    textAlign: "center",
-                  }}
-                  disabled={!script.enabled}
-                  onClick={() =>
-                    setEditingId(editingId === script.id ? null : script.id)
-                  }
-                >
-                  {editingId === script.id ? "Close" : "Edit"}
-                </button>
-
-                {/* Delete button */}
-                <button
-                  data-ref="injector-delete-btn"
-                  style={{
-                    minWidth: "100px",
-                    padding: "0.6rem 1rem",
-                    borderRadius: "6px",
-                    border: "1px solid #ff4d4f",
-                    background: "#fff",
-                    color: "#ff4d4f",
-                    cursor: "pointer",
-                    textAlign: "center",
-                  }}
-                  onClick={() => handleDelete(script.id)}
-                >
-                  Delete
-                </button>
-              </div>
+      <div className="options-body">
+        {/* Sidebar */}
+        <aside className="sidebar">
+          <div className="sidebar-search">
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                size={14}
+              />
+              <input
+                type="text"
+                className="input pl-9 h-9"
+                placeholder="Search patterns..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
+          </div>
 
-            {/* Expanded edit panel */}
-            {editingId === script.id && (
-              <div
-                data-ref="injector-edit-panel"
-                style={{
-                  marginTop: "2rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2rem",
-                  minWidth: 0,
-                  width: "100%",
-                }}
+          <div className="sidebar-list">
+            <div className="divider-label px-2 mt-2 mb-1">Your Injectors</div>
+            {filteredScripts.map((s) => (
+              <button
+                key={s.id}
+                className={cn(
+                  "sidebar-item sidebar-item-anim",
+                  activeId === s.id && "active",
+                  !s.enabled && "disabled-item"
+                )}
+                onClick={() => setActiveId(s.id)}
               >
-                <div data-ref="url-patterns-editor">
-                  <h3
-                    style={{
-                      fontSize: "1.1rem",
-                      marginBottom: "0.8rem",
-                      color: "#888",
-                      fontWeight: "normal",
-                    }}
-                  >
-                    URL Patterns (one per line)
-                  </h3>
-                  <CodeEditor
-                    value={script.urlPatterns.join("\n")}
-                    language="text"
-                    onChange={(text) =>
-                      handleUpdate(script.id, {
-                        urlPatterns: text
-                          .split("\n")
-                          .map((s) => s.trim())
-                          .filter((s) => s),
-                      })
-                    }
-                  />
-                </div>
-
-                <div data-ref="css-editor">
-                  <h3
-                    style={{
-                      fontSize: "1.3rem",
-                      marginBottom: "0.8rem",
-                      color: "#02abff",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Custom CSS
-                  </h3>
-                  <CodeEditor
-                    value={script.cssCode}
-                    language="css"
-                    onChange={(cssCode) => handleUpdate(script.id, { cssCode })}
-                  />
-                </div>
-                <div data-ref="js-editor">
-                  <h3
-                    style={{
-                      fontSize: "1.3rem",
-                      marginBottom: "0.8rem",
-                      color: "#f59e0b",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Custom JavaScript
-                  </h3>
-                  <CodeEditor
-                    value={script.jsCode}
-                    language="js"
-                    onChange={(jsCode) => handleUpdate(script.id, { jsCode })}
-                  />
-                </div>
                 <div
-                  data-ref="autosave-notice"
-                  style={{
-                    fontSize: "0.95rem",
-                    color: "#888",
-                    fontStyle: "italic",
-                    marginTop: "1rem",
-                  }}
-                >
-                  Changes are saved automatically as you type.
-                </div>
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full shrink-0",
+                    s.enabled ? "bg-primary" : "bg-text-muted"
+                  )}
+                />
+                <span className="sidebar-item-name">{s.urlPatterns[0] || "No pattern"}</span>
+                {s.cssCode && s.cssCode.trim() !== "/* Add your CSS here */" && (
+                  <span className="text-[10px] text-css font-bold opacity-70">CSS</span>
+                )}
+                {s.jsCode && s.jsCode.trim() !== "// Add your JavaScript here" && (
+                  <span className="text-[10px] text-js font-bold opacity-70">JS</span>
+                )}
+              </button>
+            ))}
+            {filteredScripts.length === 0 && (
+              <div className="text-center py-8 text-text-muted text-xs">
+                No results found
               </div>
             )}
           </div>
-        ))}
-      </section>
 
-      {/* Backup & Restore */}
-      <section
-        data-ref="backup-restore-section"
-        style={{
-          marginTop: "5rem",
-          padding: "2rem",
-          borderTop: "2px solid #eee",
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>Backup & Restore</h2>
-        <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-          <button
-            data-ref="export-btn"
-            style={{
-              padding: "0.6rem 1.2rem",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-              background: "#fff",
-              cursor: "pointer",
-            }}
-            onClick={() => exportData(state)}
-          >
-            Export All (JSON)
-          </button>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "0.9rem", color: "#666" }}>
-              Import from file:
-            </span>
-            <input
-              data-ref="import-file-input"
-              type="file"
-              accept=".json"
-              style={{ fontSize: "0.9rem" }}
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const mode = window.confirm(
-                  "Merge with existing scripts? (Cancel to Replace all)",
-                )
-                  ? "merge"
-                  : "replace";
-                try {
-                  await importData(file, mode, state);
-                  loadState();
-                  alert("Import successful!");
-                } catch (err: any) {
-                  alert(`Import failed: ${err.message}`);
-                }
-                e.target.value = "";
-              }}
-            />
+          <div className="sidebar-footer">
+            <button className="btn btn-primary w-full justify-center" onClick={handleAdd}>
+              <Plus size={16} />
+              <span>New Injector</span>
+            </button>
+            
+            <div className="flex gap-2">
+              <button 
+                className="btn btn-ghost flex-1 justify-center px-0" 
+                title="Export JSON"
+                onClick={() => exportData(state)}
+              >
+                <Download size={14} />
+              </button>
+              <label className="btn btn-ghost flex-1 justify-center px-0 cursor-pointer" title="Import JSON">
+                <Upload size={14} />
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept=".json"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const mode = await confirm({
+                      title: "Import Data",
+                      message: "Merge with existing or replace all?",
+                      confirmLabel: "Merge",
+                      cancelLabel: "Replace All",
+                    }) ? 'merge' : 'replace';
+                    try {
+                      await importData(file, mode, state);
+                      loadState();
+                      toast("Import successful", "success");
+                    } catch (err: any) {
+                      toast(`Import failed: ${err.message}`, "error");
+                    }
+                    e.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
           </div>
-        </div>
-      </section>
+        </aside>
+
+        {/* Main Panel */}
+        <main className="main-panel">
+          {activeScript ? (
+            <>
+              {/* Toolbar */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col gap-1 flex-1">
+                  <div className="text-text-hi font-semibold text-lg overflow-hidden text-ellipsis whitespace-nowrap">
+                    {activeScript.urlPatterns[0] || "No URL Pattern"}
+                  </div>
+                  <div className="text-xs text-text-muted flex items-center gap-2">
+                    <Clock size={12} />
+                    <span>Last updated: {new Date(activeScript.updatedAt).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Switch
+                    label={activeScript.enabled ? "Active" : "Disabled"}
+                    checked={activeScript.enabled}
+                    onChange={(e) => handleUpdate(activeScript.id, { enabled: e.target.checked })}
+                  />
+                  <div className="w-[1px] h-6 bg-border mx-1" />
+                  <button
+                    className="btn-icon danger"
+                    onClick={() => handleDelete(activeScript.id)}
+                    title="Delete Injector"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="sep" />
+
+              {/* URL Patterns */}
+              <div className="field-group">
+                <div className="flex items-center justify-between">
+                  <label className="field-label">URL Patterns</label>
+                  <a 
+                    href="https://developer.chrome.com/docs/extensions/mv3/match_patterns/" 
+                    target="_blank" 
+                    className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                  >
+                    View Syntax <ExternalLink size={10} />
+                  </a>
+                </div>
+                <textarea
+                  className="input font-mono text-xs min-h-[60px]"
+                  placeholder="e.g. *://*.google.com/*"
+                  value={activeScript.urlPatterns.join("\n")}
+                  onChange={(e) =>
+                    handleUpdate(activeScript.id, {
+                      urlPatterns: e.target.value.split("\n").filter(p => p.trim()),
+                    })
+                  }
+                />
+                
+                {/* Test URL */}
+                <div className="mt-2 flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={12} />
+                    <input
+                      className="input pl-8 h-8 text-xs"
+                      placeholder="Test matching URL..."
+                      value={testUrl}
+                      onChange={(e) => setTestUrl(e.target.value)}
+                    />
+                  </div>
+                  {testUrl && (
+                    <div className={cn("match-result", isMatch ? "match" : "no-match")}>
+                      {isMatch ? <Check size={12} /> : <AlertCircle size={12} />}
+                      <span>{isMatch ? "Matches" : "No match"}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Delay */}
+              <div className="field-group w-48">
+                <label className="field-label">Injection Delay (ms)</label>
+                <div className="relative">
+                  <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
+                  <input
+                    type="number"
+                    className="input pl-9 h-9"
+                    min="0"
+                    step="50"
+                    value={activeScript.delayMs}
+                    onChange={(e) => handleUpdate(activeScript.id, { delayMs: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+
+              {/* Editors */}
+              <div className="grid grid-cols-1 gap-6 mt-2">
+                <div className="editor-section">
+                  <div className="editor-section-header">
+                    <FileCode2 className="text-css" size={16} />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-css">Custom CSS</span>
+                  </div>
+                  <div className="card border-css/30">
+                    <CodeEditor
+                      value={activeScript.cssCode}
+                      language="css"
+                      onChange={(cssCode) => handleUpdate(activeScript.id, { cssCode })}
+                    />
+                  </div>
+                </div>
+
+                <div className="editor-section">
+                  <div className="editor-section-header">
+                    <Code2 className="text-js" size={16} />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-js">Custom JavaScript</span>
+                  </div>
+                  <div className="card border-js/30">
+                    <CodeEditor
+                      value={activeScript.jsCode}
+                      language="js"
+                      onChange={(jsCode) => handleUpdate(activeScript.id, { jsCode })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="empty-state">
+              <div className="p-6 rounded-full bg-surface-3 mb-4">
+                <Layout className="empty-state-icon" />
+              </div>
+              <h2>Select or create an injector</h2>
+              <p className="max-w-[280px]">
+                Create a new injector to start customizing your favorite websites with CSS and JS.
+              </p>
+              <button className="btn btn-primary mt-4" onClick={handleAdd}>
+                <Plus size={16} />
+                <span>Create First Injector</span>
+              </button>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

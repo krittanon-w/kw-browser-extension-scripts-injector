@@ -65,5 +65,5 @@ export function CodeEditor({ value, onChange, language }: CodeEditorProps) {
     }
   }, [value]);
 
-  return <div ref={editorRef} style={{ border: '1px solid #444', borderRadius: '4px', overflow: 'hidden', width: '100%', maxWidth: '100%' }} />;
+  return <div ref={editorRef} className="cm-wrapper" />;
 }

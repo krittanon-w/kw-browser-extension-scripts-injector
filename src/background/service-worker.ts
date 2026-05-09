@@ -1,11 +1,34 @@
 import { getAll } from '../lib/storage';
-import { matchesUrl } from '../lib/url-matcher';
-import { notifyError } from '../lib/notifications';
+import { globToRegex } from '../lib/url-matcher';
 import type { ScriptEntry } from '../lib/types';
 
 console.log('Background service worker loaded');
 
-const GLOBAL_DELAY_MS = 500;
+// Performance Tuning: Cache compiled regex patterns
+const regexCache = new Map<string, RegExp>();
+
+function getCachedRegex(pattern: string): RegExp {
+  const trimmed = pattern.trim();
+  let regex = regexCache.get(trimmed);
+  if (!regex) {
+    regex = globToRegex(trimmed);
+    regexCache.set(trimmed, regex);
+  }
+  return regex;
+}
+
+// Optimized matchesUrl using cache
+function matchesUrlOptimized(url: string, patterns: string[]): boolean {
+  if (!patterns || patterns.length === 0) return false;
+  return patterns.some((pattern) => {
+    try {
+      const regex = getCachedRegex(pattern);
+      return regex.test(url);
+    } catch (e) {
+      return false;
+    }
+  });
+}
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
@@ -14,9 +37,13 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
-  const tab = await chrome.tabs.get(activeInfo.tabId);
-  if (tab.url) {
-    await updateBadge(activeInfo.tabId, tab.url);
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId);
+    if (tab.url) {
+      await updateBadge(activeInfo.tabId, tab.url);
+    }
+  } catch (e) {
+    // Tab might be closed
   }
 });
 
@@ -25,6 +52,9 @@ chrome.action.onClicked.addListener(() => {
 });
 
 chrome.storage.onChanged.addListener(async () => {
+  // Clear cache when storage changes to ensure patterns are up to date
+  regexCache.clear();
+  
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab?.id && tab.url) {
     await updateBadge(tab.id, tab.url);
@@ -42,10 +72,14 @@ async function orchestrateInjection(tabId: number, url: string) {
   }
 
   for (const script of state.scripts) {
-    if (script.enabled && matchesUrl(url, script.urlPatterns)) {
+    if (script.enabled && matchesUrlOptimized(url, script.urlPatterns)) {
       activeCount++;
-      // Apply global delay
-      setTimeout(() => inject(tabId, script), GLOBAL_DELAY_MS);
+      const delay = script.delayMs || 0;
+      if (delay > 0) {
+        setTimeout(() => inject(tabId, script), delay);
+      } else {
+        inject(tabId, script);
+      }
     }
   }
 
@@ -59,7 +93,7 @@ async function updateBadge(tabId: number, url: string) {
     return;
   }
 
-  const activeCount = state.scripts.filter(s => s.enabled && matchesUrl(url, s.urlPatterns)).length;
+  const activeCount = state.scripts.filter(s => s.enabled && matchesUrlOptimized(url, s.urlPatterns)).length;
   updateBadgeWithCount(tabId, activeCount);
 }
 
@@ -82,6 +116,7 @@ async function inject(tabId: number, script: ScriptEntry) {
         target: { tabId },
         func: (code: string) => {
           try {
+            // Use a function to avoid global scope pollution and catch errors
             new Function(code)();
           } catch (e) {
             console.error('Error in injected script:', e);
@@ -91,8 +126,9 @@ async function inject(tabId: number, script: ScriptEntry) {
       });
     }
   } catch (err: any) {
-    const identifier = script.urlPatterns[0] || 'Untitled Script';
+    const identifier = script.name || script.urlPatterns[0] || 'Untitled Script';
     console.error(`Failed to inject script "${identifier}":`, err);
-    notifyError(`Failed to inject script "${identifier}": ${err.message}`);
+    // Don't spam notifications on every page load failure (e.g. restricted pages)
+    // notifyError(`Failed to inject script "${identifier}": ${err.message}`);
   }
 }
